@@ -4,7 +4,6 @@ const express = require("express");
 const cors = require("cors");
 const app = express();
 
-
 const connectToDB = require("./db/db");
 const cookieParser = require("cookie-parser");
 connectToDB();
