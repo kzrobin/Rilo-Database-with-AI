@@ -10,5 +10,5 @@ function connectToDB() {
       console.error("Error connecting to MongoDB", err);
     });
 }
-
+// sdjfnskjd
 module.exports = connectToDB;
