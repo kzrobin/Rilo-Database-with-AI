@@ -1,5 +1,5 @@
 const { validationResult } = require("express-validator");
-const User = require("../models/userModel");
+const userModel = require("../models/userModel");
 
 // register user
 const createUser = async (req, res, next) => {
@@ -15,9 +15,9 @@ const createUser = async (req, res, next) => {
 
     const { username, email, password, fullname } = req.body;
 
-    const hashPassword = await User.hashPassword(password);
+    const hashPassword = await userModel.hashPassword(password);
 
-    const newUser = await User.create({
+    const newUser = await userModel.create({
       fullname: {
         firstname: fullname.firstname,
         lastname: fullname.lastname,
@@ -92,7 +92,7 @@ const loginUser = async (req, res, next) => {
   res.cookie("token", token);
 
   res.status(201).json({
-    message: "User created successfully.",
+    message: "Login successfull",
     user: {
       _id: user._id,
       username: user.username,
