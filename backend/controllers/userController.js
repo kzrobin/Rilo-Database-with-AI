@@ -1,20 +1,30 @@
+const { validationResult } = require("express-validator");
 const User = require("../models/userModel");
 
-const createUser = async (req, res) => {
+// register user
+const createUser = async (req, res, next) => {
+  console.log("Reached");
   try {
-    const { username, email, password } = req.body;
+    const errors = validationResult(req);
 
-    if (!username || !email || !password) {
-      return res.status(400).json({
-        status: "fail",
-        message: "Please provide username, email, and password.",
-      });
+    if (!errors.isEmpty()) {
+      return res
+        .status(400)
+        .json({ errors: errors.array(), message: "Data validation error" });
     }
 
+    const { username, email, password, fullname } = req.body;
+
+    const hashPassword = await User.hashPassword(password);
+
     const newUser = await User.create({
+      fullname: {
+        firstname: fullname.firstname,
+        lastname: fullname.lastname,
+      },
       username,
       email,
-      password,
+      password: hashPassword,
     });
 
     res.status(201).json({
@@ -34,7 +44,7 @@ const createUser = async (req, res) => {
     let statusCode = 500; // Internal Server Error by default
 
     if (error.code === 11000) {
-      statusCode = 409; // 409 Conflict
+      statusCode = 409; // Conflict
       const field = Object.keys(error.keyValue)[0];
       message = `An account with that ${field} already exists.`;
     }
@@ -47,7 +57,6 @@ const createUser = async (req, res) => {
     }
 
     console.error("CREATE USER ERROR:", error);
-
     res.status(statusCode).json({
       status: "fail",
       message,
@@ -55,6 +64,7 @@ const createUser = async (req, res) => {
   }
 };
 
+// user profile
 const getUser = async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
@@ -81,6 +91,7 @@ const getUser = async (req, res) => {
   }
 };
 
+// update user
 const updateUser = async (req, res) => {
   try {
     if (req.body.password) {
@@ -128,6 +139,7 @@ const updateUser = async (req, res) => {
   }
 };
 
+// remove user
 const deleteUser = async (req, res) => {
   try {
     const user = await User.findByIdAndDelete(req.params.id);
@@ -151,6 +163,7 @@ const deleteUser = async (req, res) => {
     });
   }
 };
+
 module.exports = {
   createUser,
   getUser,
