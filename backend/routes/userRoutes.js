@@ -5,6 +5,7 @@ const {
   getUser,
   updateUser,
   deleteUser,
+  loginUser,
 } = require("../controllers/userController"); // Adjust path
 
 const router = express.Router();
@@ -23,6 +24,15 @@ router.post(
       .withMessage("Password should be at least 6 characters long"),
   ],
   createUser
+);
+
+router.post(
+  "/login",
+  [
+    body("email").isEmail().withMessage("invalid email or password"),
+    body("password").isLength({ min: 6 }),
+  ],
+  loginUser
 );
 
 router.route("/:id").get(getUser).patch(updateUser).delete(deleteUser);

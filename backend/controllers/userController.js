@@ -27,16 +27,18 @@ const createUser = async (req, res, next) => {
       password: hashPassword,
     });
 
+    // gen token
+    const token = newUser.generateAuthToken();
+    res.cookie("token", token);
+
     res.status(201).json({
-      status: "success",
       message: "User created successfully.",
-      data: {
-        user: {
-          _id: newUser._id,
-          username: newUser.username,
-          email: newUser.email,
-          createdAt: newUser.createdAt,
-        },
+      user: {
+        _id: newUser._id,
+        username: newUser.username,
+        email: newUser.email,
+        createdAt: newUser.createdAt,
+        fullname: newUser.fullname,
       },
     });
   } catch (error) {
@@ -62,6 +64,43 @@ const createUser = async (req, res, next) => {
       message,
     });
   }
+};
+
+// user login
+const loginUser = async (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res
+      .status(400)
+      .json({ errors: errors.array(), message: "Data validation error" });
+  }
+
+  const { email, password } = req.body;
+  const user = await userModel.findOne({ email }).select("+password");
+
+  if (!user) {
+    return res.status(401).json({ message: "Invalid email or password" });
+  }
+
+  const isMatch = await user.comparePassword(password);
+  if (!isMatch) {
+    return res.status(401).json({ message: "Invalid email or password" });
+  }
+
+  // gen token
+  const token = user.generateAuthToken();
+  res.cookie("token", token);
+
+  res.status(201).json({
+    message: "User created successfully.",
+    user: {
+      _id: user._id,
+      username: user.username,
+      email: user.email,
+      createdAt: user.createdAt,
+      fullname: user.fullname,
+    },
+  });
 };
 
 // user profile
@@ -169,4 +208,5 @@ module.exports = {
   getUser,
   updateUser,
   deleteUser,
+  loginUser,
 };
