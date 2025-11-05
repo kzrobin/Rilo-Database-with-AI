@@ -3,7 +3,8 @@ dotenv.config();
 const express = require("express");
 const cors = require("cors");
 const app = express();
-const homeRouter = require("./routes/home");
+const homeRouter = require("./routes/homeRoute");
+const userRouter = require("./routes/userRoute");
 
 const connectToDB = require("./db/db");
 const cookieParser = require("cookie-parser");
@@ -21,6 +22,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 app.use("/home", homeRouter);
+app.use("/api/users", userRouter);
 
 app.get("/", (req, res) => {
   res.send("hello world");
