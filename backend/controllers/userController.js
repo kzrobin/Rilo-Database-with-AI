@@ -1,5 +1,5 @@
-// Import the User model
-const User = require("../models/userModel"); // Adjust the path as needed
+const User = require("../models/userModel");
+
 const createUser = async (req, res) => {
   try {
     const { username, email, password } = req.body;
@@ -55,6 +55,105 @@ const createUser = async (req, res) => {
   }
 };
 
+const getUser = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+
+    if (!user) {
+      return res.status(404).json({
+        status: "fail",
+        message: "No user found with that ID.",
+      });
+    }
+
+    res.status(200).json({
+      status: "success",
+      data: {
+        user,
+      },
+    });
+  } catch (error) {
+    console.error("GET USER ERROR:", error);
+    res.status(500).json({
+      status: "fail",
+      message: "An error occurred while fetching the user.",
+    });
+  }
+};
+
+const updateUser = async (req, res) => {
+  try {
+    if (req.body.password) {
+      return res.status(400).json({
+        status: "fail",
+        message:
+          "This route is not for password updates. Please use /update-password.",
+      });
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+      runValidators: true,
+    });
+
+    if (!updatedUser) {
+      return res.status(404).json({
+        status: "fail",
+        message: "No user found with that ID to update.",
+      });
+    }
+
+    res.status(200).json({
+      status: "success",
+      message: "User updated successfully.",
+      data: {
+        user: updatedUser,
+      },
+    });
+  } catch (error) {
+    let message = "An error occurred while updating the user.";
+    let statusCode = 500;
+
+    if (error.code === 11000) {
+      statusCode = 409; // Conflict
+      const field = Object.keys(error.keyValue)[0];
+      message = `An account with that ${field} already exists.`;
+    }
+
+    console.error("UPDATE USER ERROR:", error);
+    res.status(statusCode).json({
+      status: "fail",
+      message,
+    });
+  }
+};
+
+const deleteUser = async (req, res) => {
+  try {
+    const user = await User.findByIdAndDelete(req.params.id);
+
+    if (!user) {
+      return res.status(404).json({
+        status: "fail",
+        message: "No user found with that ID to delete.",
+      });
+    }
+
+    res.status(204).json({
+      status: "success",
+      data: null,
+    });
+  } catch (error) {
+    console.error("DELETE USER ERROR:", error);
+    res.status(500).json({
+      status: "fail",
+      message: "An error occurred while deleting the user.",
+    });
+  }
+};
 module.exports = {
   createUser,
+  getUser,
+  updateUser,
+  deleteUser,
 };
