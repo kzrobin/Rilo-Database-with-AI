@@ -1,5 +1,6 @@
 const { validationResult } = require("express-validator");
 const userModel = require("../models/userModel");
+const blackListTokenModel = require("../models/tokenBlackListModel.js");
 
 // register user
 const createUser = async (req, res, next) => {
@@ -106,7 +107,7 @@ const loginUser = async (req, res, next) => {
 // user profile
 const getUser = async (req, res) => {
   try {
-    const user = await User.findById(req.params.id);
+    const user = await userModel.findById(req.params.id);
 
     if (!user) {
       return res.status(404).json({
@@ -141,10 +142,14 @@ const updateUser = async (req, res) => {
       });
     }
 
-    const updatedUser = await User.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-      runValidators: true,
-    });
+    const updatedUser = await userModel.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
 
     if (!updatedUser) {
       return res.status(404).json({
@@ -178,10 +183,39 @@ const updateUser = async (req, res) => {
   }
 };
 
+// logout user
+const logoutUser = async (req, res, next) => {
+  try {
+    const token =
+      req.cookies.token ||
+      (req.headers.Authorization
+        ? req.headers.authorization.split(" ")[1]
+        : undefined);
+
+    if (!token) {
+      return res.status(400).json({ message: "Unauthorized access" });
+    }
+
+    // Add the token to the blacklist
+    await blackListTokenModel.create({ token });
+
+    // Clear the cookie
+    res.clearCookie("token");
+
+    // response
+    return res.status(200).json({ message: "Logout Successfully" });
+  } catch (err) {
+    return res.status(500).json({
+      message: "Internal server error",
+      error: err.message,
+    });
+  }
+};
+
 // remove user
 const deleteUser = async (req, res) => {
   try {
-    const user = await User.findByIdAndDelete(req.params.id);
+    const user = await userModel.findByIdAndDelete(req.params.id);
 
     if (!user) {
       return res.status(404).json({
@@ -209,4 +243,5 @@ module.exports = {
   updateUser,
   deleteUser,
   loginUser,
+  logoutUser,
 };
