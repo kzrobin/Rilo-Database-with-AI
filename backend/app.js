@@ -29,6 +29,7 @@ app.use("/api/fabrics", fabricRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/cart", cartRoutes);
 
+
 app.get("/", (req, res) => {
   res.send("hello world");
 });

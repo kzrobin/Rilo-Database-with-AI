@@ -4,11 +4,11 @@ const {
   addOrUpdateCartItem,
   removeItemFromCart,
 } = require("../controllers/cartController");
-// const authMiddleware = require("../middleware/authMiddleware");
+const authMiddleware = require("../middleware/authUser");
 
 const router = express.Router();
 
-// router.use(authMiddleware);
+router.use(authMiddleware);
 
 router.route("/").get(getMyCart);
 
