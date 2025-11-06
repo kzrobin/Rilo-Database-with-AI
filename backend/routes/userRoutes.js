@@ -1,11 +1,14 @@
 const express = require("express");
 const { body } = require("express-validator");
+const authuser = require("../middleware/authUser.js");
+
 const {
   createUser,
   getUser,
   updateUser,
   deleteUser,
   loginUser,
+  logoutUser,
 } = require("../controllers/userController"); // Adjust path
 
 const router = express.Router();
@@ -34,6 +37,8 @@ router.post(
   ],
   loginUser
 );
+
+router.post("/logout", authuser, logoutUser);
 
 router.route("/:id").get(getUser).patch(updateUser).delete(deleteUser);
 
