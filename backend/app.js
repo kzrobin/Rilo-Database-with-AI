@@ -7,6 +7,7 @@ const homeRoutes = require("./routes/homeRoutes");
 const userRoutes = require("./routes/userRoutes");
 const fabricRoutes = require("./routes/fabricRoutes");
 const productRoutes = require("./routes/productRoutes");
+const cartRoutes = require("./routes/cartRoutes");
 
 const connectToDB = require("./db/db");
 const cookieParser = require("cookie-parser");
@@ -26,6 +27,7 @@ app.use("/home", homeRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/fabrics", fabricRoutes);
 app.use("/api/products", productRoutes);
+app.use("/api/cart", cartRoutes);
 
 app.get("/", (req, res) => {
   res.send("hello world");
