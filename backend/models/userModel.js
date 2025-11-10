@@ -39,6 +39,17 @@ const userSchema = new mongoose.Schema(
       minlength: 6,
       select: false,
     },
+
+    // ======================= ROLE FIELD ADDED HERE =======================
+    role: {
+      type: String,
+      // enum ensures the role can only be one of these two values
+      enum: ["user", "admin"],
+      // By default, any new user will have the 'user' role
+      default: "user",
+    },
+    // =====================================================================
+
     verifyOtp: {
       type: String,
       default: null,
@@ -70,9 +81,12 @@ const userSchema = new mongoose.Schema(
 );
 
 userSchema.methods.generateAuthToken = function () {
-  const token = jwt.sign({ _id: this._id }, process.env.JWT_SECRET, {
-    expiresIn: "1h",
-  });
+  const token = jwt.sign(
+    // THE FIX: Add 'role: this.role' to the payload
+    { _id: this._id, role: this.role },
+    process.env.JWT_SECRET,
+    { expiresIn: "1h" }
+  );
   return token;
 };
 

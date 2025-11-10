@@ -8,6 +8,7 @@ const userRoutes = require("./routes/userRoutes");
 const fabricRoutes = require("./routes/fabricRoutes");
 const productRoutes = require("./routes/productRoutes");
 const cartRoutes = require("./routes/cartRoutes");
+const orderRouter = require("./routes/orderRoutes");
 
 const connectToDB = require("./db/db");
 const cookieParser = require("cookie-parser");
@@ -28,7 +29,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/fabrics", fabricRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/cart", cartRoutes);
-
+app.use("/api/orders", orderRouter);
 
 app.get("/", (req, res) => {
   res.send("hello world");

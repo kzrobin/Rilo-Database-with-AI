@@ -25,8 +25,10 @@ const authuser = async (req, res, next) => {
       fullname: user.fullname,
       username: user.username,
       email: user.email,
+      role: user.role,
     };
     req.user = userData;
+    console.log("Authenticated User:", req.user);
     return next();
   } catch (err) {
     return res.status(401).json({ message: "Unauthorized access" });
