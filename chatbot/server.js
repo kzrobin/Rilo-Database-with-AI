@@ -32,7 +32,13 @@ async function connectToDb() {
 
 // A "Deny List" of keywords for our security checkpoint to prevent write/delete operations
 const FORBIDDEN_KEYWORDS = [
-    'delete', 'remove', 'drop', 'update', 'insert', 'create', 'runcommand'
+  "delete",
+  "remove",
+  "drop",
+  "update",
+  "insert",
+  "create",
+  "runcommand",
 ];
 
 /**
@@ -42,49 +48,54 @@ const FORBIDDEN_KEYWORDS = [
  * @returns {Promise<any>} A promise that resolves to the database result.
  */
 async function executeMongoQuerySafely(queryString) {
-    // This regex captures the collection, method, and arguments from a query string.
-    const match = /db\.(\w+)\.(\w+)\(([\s\S]*?)\)$/.exec(queryString);
+  // This regex captures the collection, method, and arguments from a query string.
+  const match = /db\.(\w+)\.(\w+)\(([\s\S]*?)\)$/.exec(queryString);
 
-    if (!match) {
-        throw new Error("Unsupported or malformed query string. Could not find db.collection.method() pattern.");
+  if (!match) {
+    throw new Error(
+      "Unsupported or malformed query string. Could not find db.collection.method() pattern."
+    );
+  }
+
+  const [, collectionName, method, argsStr] = match;
+  const collection = db.collection(collectionName);
+
+  // --- THE SECURE SANDBOX ---
+  // Create a secure, empty context. The code executed inside can't access your server's file system or network.
+  const sandbox = {
+    ObjectId: ObjectId, // We safely provide the ObjectId constructor for queries that might need it.
+  };
+  const context = vm.createContext(sandbox);
+  // -------------------
+
+  try {
+    // We wrap the arguments in an array `[ ... ]` and execute the string in the sandbox.
+    // This safely converts the MongoDB shell arguments into native JavaScript objects.
+    const args = vm.runInContext(`[${argsStr}]`, context);
+
+    // Based on the method detected, call the appropriate safe pymongo function.
+    if (method === "find") {
+      const filter = args[0] || {};
+      const projection = args[1] || {};
+      return await collection.find(filter, { projection }).toArray();
+    } else if (method === "countDocuments") {
+      const filter = args[0] || {};
+      return await collection.countDocuments(filter);
+    } else if (method === "aggregate") {
+      const pipeline = args[0] || [];
+      return await collection.aggregate(pipeline).toArray();
+    } else {
+      throw new Error(
+        `Unsupported method: '${method}'. Only find, countDocuments, and aggregate are allowed.`
+      );
     }
-
-    const [, collectionName, method, argsStr] = match;
-    const collection = db.collection(collectionName);
-
-    // --- THE SECURE SANDBOX ---
-    // Create a secure, empty context. The code executed inside can't access your server's file system or network.
-    const sandbox = {
-      ObjectId: ObjectId // We safely provide the ObjectId constructor for queries that might need it.
-    };
-    const context = vm.createContext(sandbox);
-    // -------------------
-
-    try {
-        // We wrap the arguments in an array `[ ... ]` and execute the string in the sandbox.
-        // This safely converts the MongoDB shell arguments into native JavaScript objects.
-        const args = vm.runInContext(`[${argsStr}]`, context);
-
-        // Based on the method detected, call the appropriate safe pymongo function.
-        if (method === "find") {
-            const filter = args[0] || {};
-            const projection = args[1] || {};
-            return await collection.find(filter, { projection }).toArray();
-        } else if (method === "countDocuments") {
-            const filter = args[0] || {};
-            return await collection.countDocuments(filter);
-        } else if (method === "aggregate") {
-            const pipeline = args[0] || [];
-            return await collection.aggregate(pipeline).toArray();
-        } else {
-            throw new Error(`Unsupported method: '${method}'. Only find, countDocuments, and aggregate are allowed.`);
-        }
-    } catch (e) {
-        // This will catch any syntax errors in the AI's generated arguments.
-        throw new Error(`Could not execute query arguments: ${argsStr}. Error: ${e.message}`);
-    }
+  } catch (e) {
+    // This will catch any syntax errors in the AI's generated arguments.
+    throw new Error(
+      `Could not execute query arguments: ${argsStr}. Error: ${e.message}`
+    );
+  }
 }
-
 
 // --- THE MAIN API ENDPOINT ---
 app.post("/translate-and-run", async (req, res) => {
@@ -99,24 +110,30 @@ app.post("/translate-and-run", async (req, res) => {
     console.log(`Generated query: ${generatedQuery}`);
 
     // Step 2: Run the query through the Security Checkpoint
-    if (generatedQuery.trim().toUpperCase() === 'FORBIDDEN') {
-      return res.status(403).json({ error: "This type of query is not allowed." });
+    if (generatedQuery.trim().toUpperCase() === "FORBIDDEN") {
+      return res
+        .status(403)
+        .json({ error: "This type of query is not allowed." });
     }
     const queryLower = generatedQuery.toLowerCase();
-    if (FORBIDDEN_KEYWORDS.some(keyword => queryLower.includes(keyword))) {
-        console.log(`SECURITY ALERT: Forbidden keyword detected in query.`);
-        return res.status(403).json({ error: "This query contains a forbidden operation and cannot be processed." });
+    if (FORBIDDEN_KEYWORDS.some((keyword) => queryLower.includes(keyword))) {
+      console.log(`SECURITY ALERT: Forbidden keyword detected in query.`);
+      return res
+        .status(403)
+        .json({
+          error:
+            "This query contains a forbidden operation and cannot be processed.",
+        });
     }
 
     // Step 3: If checks pass, execute the query using our safe sandbox parser
     const resultData = await executeMongoQuerySafely(generatedQuery);
-    
+
     // Step 4: Return the successful response
     res.json({
       mongodb_query: generatedQuery,
       query_result: resultData,
     });
-
   } catch (error) {
     // This catches any errors from the AI, the parser, or the database and returns a clean 500 error.
     console.error("An error occurred during the process:", error);
@@ -124,12 +141,11 @@ app.post("/translate-and-run", async (req, res) => {
   }
 });
 
-
 // --- Start the Server ---
 const PORT = process.env.PORT || 3000;
 // We must connect to the database *before* we start listening for web requests.
 connectToDb().then(() => {
-    app.listen(PORT, () => {
-        console.log(`Server is running on port ${PORT}`);
-    });
+  app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+  });
 });
