@@ -23,7 +23,6 @@ const authuser = async (req, res, next) => {
     const userData = {
       _id: user._id,
       fullname: user.fullname,
-      username: user.username,
       email: user.email,
       role: user.role,
     };

@@ -3,7 +3,7 @@ const { body } = require("express-validator");
 const authuser = require("../middleware/authUser.js");
 
 const {
-  createUser,
+  register,
   getUser,
   updateUser,
   deleteUser,
@@ -26,7 +26,7 @@ router.post(
       .isLength({ min: 6 })
       .withMessage("Password must be at least 6 characters long"),
   ],
-  createUser
+  register
 );
 
 router.post(
@@ -39,6 +39,11 @@ router.post(
 );
 
 router.post("/logout", authuser, logoutUser);
+router.get("/auth-user", authuser, (req, res, next) => {
+  return res.status(200).json({
+    user: req.user,
+  });
+});
 
 router.route("/:id").get(getUser).patch(updateUser).delete(deleteUser);
 

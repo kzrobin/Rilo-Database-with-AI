@@ -121,7 +121,7 @@ function CommonForm({
       <Button
         disabled={isBtnDisabled}
         type="submit"
-        className="mt-2 w-full bg-black  "
+        className="mt-2 w-full bg-black hover:cursor-pointer hover:text-shadow-sidebar-accent-foreground"
         variant={"primary"}
       >
         {buttonText || "Submit"}

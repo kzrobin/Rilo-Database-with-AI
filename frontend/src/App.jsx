@@ -14,15 +14,31 @@ import ShoppingCheckout from "./pages/shopping-view/checkout";
 import CheckAuth from "./components/common/check-auth";
 import UnauthPage from "./pages/unauth-page";
 
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { useDispatch, useSelector } from "react-redux";
+import store from "./store/store";
+import { checkAuth } from "./store/auth-slice";
+import { useEffect } from "react";
+
 function App() {
+  const { isAuthenticated, user } = useSelector((state) => state.auth);
+
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(checkAuth());
+  }, [dispatch]);
+
   return (
-    <div className="Flex flex-col overflow-hidden bg-white ">
+    <div className="flex flex-col overflow-hidden bg-white ">
+      <ToastContainer position="top-right" autoClose={3000} />
       <h1>Header Component</h1>
       <Routes>
         <Route
           path="auth"
           element={
-            <CheckAuth>
+            <CheckAuth isAuthenticated={isAuthenticated} user={user}>
               <AuthLayout />
             </CheckAuth>
           }
@@ -33,7 +49,7 @@ function App() {
         <Route
           path="/admin"
           element={
-            <CheckAuth>
+            <CheckAuth isAuthenticated={isAuthenticated} user={user}>
               <AdminLayout />
             </CheckAuth>
           }
@@ -46,7 +62,7 @@ function App() {
         <Route
           path="shop"
           element={
-            <CheckAuth>
+            <CheckAuth isAuthenticated={isAuthenticated} user={user}>
               <ShoppingLayout />
             </CheckAuth>
           }

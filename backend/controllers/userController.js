@@ -3,72 +3,62 @@ const userModel = require("../models/userModel");
 const blackListTokenModel = require("../models/tokenBlackListModel.js");
 
 // register user
-const createUser = async (req, res) => {
+
+const register = async (req, res) => {
   try {
-    // validation error
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res
-        .status(400)
-        .json({ errors: errors.array(), message: "Data validation error" });
+      return res.status(400).json({
+        errors: errors.array(),
+        message: "Data validation error",
+      });
     }
 
-    // add user
-    const { userName, username, email, password, firstname, lastname } =
-      req.body;
-    const finalUsername = userName || username;
+    const { firstname, lastname, email, password } = req.body;
 
+    // Check if user already exists
+    const existingUser = await userModel.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ message: "Email already exists" });
+    }
+
+    // Hash password
     const hashPassword = await userModel.hashPassword(password);
-    const newUser = await userModel.create({
+
+    // Create new user
+    const user = await userModel.create({
       fullname: {
         firstname,
         lastname,
       },
-      username: finalUsername,
       email,
       password: hashPassword,
     });
 
-    // token generate
-    const token = newUser.generateAuthToken();
+    const token = user.generateAuthToken();
+
     res.cookie("token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 1 week
+      maxAge: 60 * 60 * 1000, // 1h
     });
 
-    return res.status(201).json({
-      message: "User created successfully.",
+    // Response
+    res.status(201).json({
+      message: "Registration successful",
       user: {
-        _id: newUser._id,
-        username: newUser.username,
-        email: newUser.email,
-        createdAt: newUser.createdAt,
-        fullname: newUser.fullname,
-        role: newUser.role,
+        _id: user._id,
+        firstname: user.firstname,
+        lastname: user.lastname,
+        email: user.email,
+        role: user.role,
+        createdAt: user.createdAt,
       },
-      token,
     });
-  } catch (error) {
-    console.error("CREATE USER ERROR:", error);
-
-    let message = "An error occurred while creating the user.";
-    let statusCode = 500;
-
-    if (error.code === 11000) {
-      message = "User with this email or username already exists.";
-      statusCode = 400;
-    }
-
-    if (error.name === "ValidationError") {
-      message = Object.values(error.errors)
-        .map((err) => err.message)
-        .join(", ");
-      statusCode = 400;
-    }
-
-    res.status(statusCode).json({ status: "fail", message });
+  } catch (err) {
+    console.error("REGISTER ERROR:", err);
+    res.status(500).json({ message: "Server error during registration." });
   }
 };
 
@@ -94,7 +84,7 @@ const loginUser = async (req, res, next) => {
       return res.status(401).json({ message: "Invalid email or password" });
     }
 
-    const token = user.generateAuthToken();
+    const token = await user.generateAuthToken();
     res.cookie("token", token);
 
     res.status(200).json({
@@ -102,7 +92,6 @@ const loginUser = async (req, res, next) => {
       message: "Login successful",
       user: {
         _id: user._id,
-        username: user.username,
         email: user.email,
         createdAt: user.createdAt,
         fullname: user.fullname,
@@ -239,7 +228,7 @@ const deleteUser = async (req, res) => {
 };
 
 module.exports = {
-  createUser,
+  register,
   getUser,
   updateUser,
   deleteUser,
