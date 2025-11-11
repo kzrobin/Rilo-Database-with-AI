@@ -1,14 +1,13 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
-
-import { registerFromContols } from "@/config";
-
+import { Link, useNavigate } from "react-router-dom";
+import { registerFormControls } from "@/config"; // ✅ renamed for clarity
 import CommonForm from "@/components/common/form";
+import { useDispatch } from "react-redux";
+import { registerUser } from "@/store/auth-slice";
 
 const initialState = {
   firstname: "",
   lastname: "",
-  userName: "",
   email: "",
   password: "",
 };
@@ -16,7 +15,19 @@ const initialState = {
 const AuthRegister = () => {
   const [formData, setFormData] = useState(initialState);
 
-  function onSubmit() {}
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const onSubmit = async (event) => {
+    event.preventDefault(); 
+
+    try {
+      await dispatch(registerUser(formData)).unwrap();
+      navigate("/shop");
+    } catch (error) {
+      console.error("Registration failed:", error);
+    }
+  };
 
   return (
     <div className="mx-auto w-full max-w-md space-y-6">
@@ -25,18 +36,19 @@ const AuthRegister = () => {
           Sign Up
         </h1>
       </div>
+
       <div>
         <CommonForm
-          formControls={registerFromContols}
-          buttonText={"Sign Up"}
+          formControls={registerFormControls}
+          buttonText="Sign Up"
           onSubmit={onSubmit}
           formData={formData}
           setFormData={setFormData}
         />
       </div>
+
       <div className="flex justify-center">
-        {" "}
-        <p>Already have an acoount?</p>
+        <p>Already have an account?</p>
         <Link
           to="/auth/login"
           className="font-medium ml-2 text-primary hover:underline"

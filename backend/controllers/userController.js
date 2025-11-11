@@ -3,8 +3,9 @@ const userModel = require("../models/userModel");
 const blackListTokenModel = require("../models/tokenBlackListModel.js");
 
 // register user
-const createUser = async (req, res, next) => {
+const createUser = async (req, res) => {
   try {
+    // validation error
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res
@@ -12,24 +13,32 @@ const createUser = async (req, res, next) => {
         .json({ errors: errors.array(), message: "Data validation error" });
     }
 
-    const { username, email, password, fullname } = req.body;
-    const hashPassword = await userModel.hashPassword(password);
+    // add user
+    const { userName, username, email, password, firstname, lastname } =
+      req.body;
+    const finalUsername = userName || username;
 
-    // The 'role' will be set to 'user' by default from the model, so we don't need to provide it here.
+    const hashPassword = await userModel.hashPassword(password);
     const newUser = await userModel.create({
       fullname: {
-        firstname: fullname.firstname,
-        lastname: fullname.lastname,
+        firstname,
+        lastname,
       },
-      username,
+      username: finalUsername,
       email,
       password: hashPassword,
     });
 
+    // token generate
     const token = newUser.generateAuthToken();
-    res.cookie("token", token);
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 1 week
+    });
 
-    res.status(201).json({
+    return res.status(201).json({
       message: "User created successfully.",
       user: {
         _id: newUser._id,
@@ -37,20 +46,28 @@ const createUser = async (req, res, next) => {
         email: newUser.email,
         createdAt: newUser.createdAt,
         fullname: newUser.fullname,
-        role: newUser.role, // <-- Include role in the response
+        role: newUser.role,
       },
+      token,
     });
   } catch (error) {
-    // ... (your excellent error handling remains the same)
+    console.error("CREATE USER ERROR:", error);
+
     let message = "An error occurred while creating the user.";
     let statusCode = 500;
+
     if (error.code === 11000) {
-      /* ... */
+      message = "User with this email or username already exists.";
+      statusCode = 400;
     }
+
     if (error.name === "ValidationError") {
-      /* ... */
+      message = Object.values(error.errors)
+        .map((err) => err.message)
+        .join(", ");
+      statusCode = 400;
     }
-    console.error("CREATE USER ERROR:", error);
+
     res.status(statusCode).json({ status: "fail", message });
   }
 };

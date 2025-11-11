@@ -15,16 +15,16 @@ const router = express.Router();
 router.post(
   "/register",
   [
-    body("email").isEmail().withMessage("Indalid Email"),
-    body("fullname.firstname")
+    body("email").isEmail().withMessage("Invalid email"),
+    body("firstname")
       .isLength({ min: 3 })
-      .withMessage("First name should be atleast three characters long"),
-    body("fullname.lastname")
+      .withMessage("First name must be at least 3 characters long"),
+    body("lastname")
       .isLength({ min: 3 })
-      .withMessage("Lastname must be at least 3 characters long"),
+      .withMessage("Last name must be at least 3 characters long"),
     body("password")
       .isLength({ min: 6 })
-      .withMessage("Password should be at least 6 characters long"),
+      .withMessage("Password must be at least 6 characters long"),
   ],
   createUser
 );
