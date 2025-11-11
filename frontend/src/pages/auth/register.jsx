@@ -6,6 +6,8 @@ import { registerFromContols } from "@/config";
 import CommonForm from "@/components/common/form";
 
 const initialState = {
+  firstname: "",
+  lastname: "",
   userName: "",
   email: "",
   password: "",
