@@ -3,7 +3,7 @@
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 require("dotenv").config(); // Loads variables from .env file
 
-// --- FINAL, ACCURATE DATABASE SCHEMA ---
+//DATABASE SCHEMA ---
 const FINAL_DATABASE_SCHEMA = `
 This database is for an e-commerce application selling fabric-based products.
 MongoDB collection names are the plural, lowercase version of the Mongoose model name (e.g., User model -> 'users' collection).
@@ -37,7 +37,7 @@ Description: Stores completed orders for users.
 Fields: - _id (Type: ObjectId), user_id (Type: ObjectId), orderItems (Type: Array of Objects), total_amount (Type: Number), status (Type: String), order_date (Type: Date)
 `;
 
-// --- FINAL, MOST SECURE PROMPT TEMPLATE ---
+//PROMPT TEMPLATE ---
 const PROMPT_TEMPLATE = `
 You are a MongoDB data analyst for an e-commerce application. Your ONLY job is to take a user's question and a database schema, and then generate a precise, machine-readable, READ-ONLY MongoDB query.
 
