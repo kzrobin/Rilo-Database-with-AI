@@ -10,6 +10,7 @@ const productRoutes = require("./routes/productRoutes");
 const cartRoutes = require("./routes/cartRoutes");
 const orderRouter = require("./routes/orderRoutes");
 const aiQueryRouter = require("./routes/aiQueryRoutes");
+const adminProductsRouter = require("./routes/adminProductRoutes");
 
 const connectToDB = require("./db/db");
 const cookieParser = require("cookie-parser");
@@ -25,7 +26,9 @@ app.use(
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+
 app.use("/", homeRoutes);
+app.use("/api/admin", adminProductsRouter);
 app.use("/api/users", userRoutes);
 app.use("/api/fabrics", fabricRoutes);
 app.use("/api/products", productRoutes);

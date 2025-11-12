@@ -38,7 +38,6 @@ function App() {
   return (
     <div className="flex flex-col overflow-hidden bg-white ">
       <ToastContainer position="top-right" autoClose={3000} />
-      <h1>Header Component</h1>
       <Routes>
         <Route
           path="auth"
@@ -60,7 +59,7 @@ function App() {
           }
         >
           <Route path="dashboard" element={<AdminDashbroad />} />
-          <Route path="product" element={<AdminProduct />} />
+          <Route path="products" element={<AdminProduct />} />
           <Route path="order" element={<AdminOrder />} />
         </Route>
 

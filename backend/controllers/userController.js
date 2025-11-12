@@ -1,5 +1,5 @@
 const { validationResult } = require("express-validator");
-const userModel = require("../models/userModel");
+const UserModel = require("../models/userModel");
 const blackListTokenModel = require("../models/tokenBlackListModel.js");
 
 // register user
@@ -17,16 +17,16 @@ const register = async (req, res) => {
     const { firstname, lastname, email, password } = req.body;
 
     // Check if user already exists
-    const existingUser = await userModel.findOne({ email });
+    const existingUser = await UserModel.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ message: "Email already exists" });
     }
 
     // Hash password
-    const hashPassword = await userModel.hashPassword(password);
+    const hashPassword = await UserModel.hashPassword(password);
 
     // Create new user
-    const user = await userModel.create({
+    const user = await UserModel.create({
       fullname: {
         firstname,
         lastname,
@@ -73,7 +73,7 @@ const loginUser = async (req, res, next) => {
     }
 
     const { email, password } = req.body;
-    const user = await userModel.findOne({ email }).select("+password");
+    const user = await UserModel.findOne({ email }).select("+password");
 
     if (!user) {
       return res.status(401).json({ message: "Invalid email or password" });
@@ -111,7 +111,7 @@ const getUser = async (req, res) => {
   // Note: For enhanced security, you might also want to protect this route
   // to ensure only admins can get arbitrary user profiles.
   try {
-    const user = await userModel.findById(req.params.id);
+    const user = await UserModel.findById(req.params.id);
 
     if (!user) {
       return res
@@ -152,7 +152,7 @@ const updateUser = async (req, res) => {
       });
     }
 
-    const updatedUser = await userModel.findByIdAndUpdate(
+    const updatedUser = await UserModel.findByIdAndUpdate(
       req.params.id,
       req.body,
       {
@@ -212,7 +212,7 @@ const deleteUser = async (req, res) => {
   }
 
   try {
-    const user = await userModel.findByIdAndDelete(req.params.id);
+    const user = await UserModel.findByIdAndDelete(req.params.id);
 
     if (!user) {
       return res.status(404).json({

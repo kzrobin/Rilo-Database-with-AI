@@ -1,6 +1,25 @@
 const Product = require("../models/productModel");
 const Fabric = require("../models/fabricModel");
 
+const handleImageUpload = async (req, res) => {
+  try {
+    const b64 = Buffer.from(req.file.buffer).toString("base64");
+    const url = "data:" + req.file.mimetype + ";base64," + b64;
+    const result = await imageUploadUtil(url);
+
+    res.json({
+      success: true,
+      result,
+    });
+  } catch (error) {
+    console.log(error);
+    res.json({
+      success: false,
+      message: "Error occured",
+    });
+  }
+};
+
 const createProduct = async (req, res) => {
   try {
     const { product_name, description, price, stock_quantity, fabric_id } =
@@ -53,10 +72,11 @@ const createProduct = async (req, res) => {
 
 const getAllProducts = async (req, res) => {
   try {
-    const products = await Product.find().populate(
-      "fabric_id",
-      "fabric_name material color"
-    );
+    const products = await Product.find();
+    // .populate(
+    //   "fabric_id",
+    //   "fabric_name material color"
+    // );
 
     res.status(200).json({
       status: "success",
@@ -166,4 +186,5 @@ module.exports = {
   getProductById,
   updateProduct,
   deleteProduct,
+  handleImageUpload,
 };
