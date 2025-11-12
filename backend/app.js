@@ -20,8 +20,8 @@ app.use(
     origin: process.env.FRONTEMD_URL.split(","),
     credentials: true,
   })
-);
-
+); 
+    
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
