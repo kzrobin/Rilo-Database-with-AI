@@ -6,8 +6,11 @@ const {
   updateProduct,
   deleteProduct,
 } = require("../controllers/productController");
+const { productReviewRouter } = require("./reviewRoutes");
 
 const router = express.Router();
+
+router.use("/:productId/reviews", productReviewRouter);
 
 router.route("/").post(createProduct).get(getAllProducts);
 
