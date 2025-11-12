@@ -5,19 +5,27 @@ const baseUrl = import.meta.env.VITE_BASE_URL;
 
 const initialState = {
   isAuthenticated: false,
-  isLoading: false,
+  isLoading: true,
   user: null,
 };
 
-export const checkAuth = createAsyncThunk("/check-auth", async () => {
-  try {
-    const response = await axios.post(`${baseUrl}/users/check-auth`, {
-      withCredentials: true,
-    });
-  } catch (error) {
-    return rejectWithValue(error.response?.data || error.message);
+export const checkAuth = createAsyncThunk(
+  "/check-auth",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await axios.get(`${baseUrl}/users/auth-user`, {
+        withCredentials: true,
+      });
+
+      console.log("Async thunk - checkAuth");
+      console.log(response.data);
+
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || error.message);
+    }
   }
-});
+);
 
 export const registerUser = createAsyncThunk(
   "auth/register",
@@ -26,9 +34,9 @@ export const registerUser = createAsyncThunk(
       const response = await axios.post(`${baseUrl}/users/register`, formData, {
         withCredentials: true,
       });
-      return response.data; // expect { user: {...}, token: ... } or similar
+      console.log(response.data);
+      return response.data;
     } catch (error) {
-      // Pass backend error to rejected case
       return rejectWithValue(error.response?.data || error.message);
     }
   }
@@ -41,9 +49,8 @@ export const loginUser = createAsyncThunk(
       const response = await axios.post(`${baseUrl}/users/login`, formData, {
         withCredentials: true,
       });
-      return response.data; // expect { user: {...}, token: ... } or similar
+      return response.data;
     } catch (error) {
-      // Pass backend error to rejected case
       return rejectWithValue(error.response?.data || error.message);
     }
   }
@@ -69,11 +76,10 @@ const authSlice = createSlice({
       })
       .addCase(registerUser.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.user = action.payload.user || null; // depends on API
-        console.log(action.payload); // checking console
+        state.user = action.payload.user || null;
         state.isAuthenticated = !!action.payload.user;
       })
-      .addCase(registerUser.rejected, (state, action) => {
+      .addCase(registerUser.rejected, (state) => {
         state.isLoading = false;
         state.user = null;
         state.isAuthenticated = false;
@@ -83,11 +89,10 @@ const authSlice = createSlice({
       })
       .addCase(loginUser.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.user = action.payload.user || null; // depends on API
-        console.log(action.payload); // checking console
+        state.user = action.payload.user || null;
         state.isAuthenticated = true;
       })
-      .addCase(loginUser.rejected, (state, action) => {
+      .addCase(loginUser.rejected, (state) => {
         state.isLoading = false;
         state.user = null;
         state.isAuthenticated = false;
@@ -97,11 +102,10 @@ const authSlice = createSlice({
       })
       .addCase(checkAuth.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.user = action.payload.user || null; // depends on API
-        console.log(action.payload); // checking console
+        state.user = action.payload.user || null;
         state.isAuthenticated = true;
       })
-      .addCase(checkAuth.rejected, (state, action) => {
+      .addCase(checkAuth.rejected, (state) => {
         state.isLoading = false;
         state.user = null;
         state.isAuthenticated = false;

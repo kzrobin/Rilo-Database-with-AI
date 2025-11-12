@@ -22,6 +22,6 @@ const fabricSchema = new Schema(
   { timestamps: true }
 );
 
-const Fabric = mongoose.model("Fabric", fabricSchema);
+const FabricModel = mongoose.model("Fabric", fabricSchema);
 
-module.exports = Fabric;
+module.exports = FabricModel;
