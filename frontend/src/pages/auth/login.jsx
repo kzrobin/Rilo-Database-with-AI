@@ -1,9 +1,10 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
-
+import { Link, useNavigate } from "react-router-dom";
 import { loginFromContols } from "@/config";
-
 import CommonForm from "@/components/common/form";
+import { useDispatch } from "react-redux";
+import { toast } from "react-toastify";
+import { loginUser } from "@/store/auth-slice";
 
 const initialState = {
   email: "",
@@ -12,8 +13,27 @@ const initialState = {
 
 const AuthLogin = () => {
   const [formData, setFormData] = useState(initialState);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
-  function onSubmit() {}
+  const onSubmit = async (event) => {
+    event.preventDefault();
+
+    console.log(formData);
+
+    try {
+      await dispatch(loginUser(formData))
+        .unwrap()
+        .then((data) => {
+          console.log(data);
+        });
+      navigate("/shop");
+      toast.success("Wellcome to Rilo Cloths");
+    } catch (error) {
+      console.error("Registration failed:", error);
+      toast.error(error?.message || "An error occured");
+    }
+  };
 
   return (
     <div className="mx-auto w-full max-w-md space-y-6">

@@ -3,7 +3,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { registerFormControls } from "@/config"; // ✅ renamed for clarity
 import CommonForm from "@/components/common/form";
 import { useDispatch } from "react-redux";
-import { registerUser } from "@/store/auth-slice";
+import { registerUser, loginUser } from "@/store/auth-slice";
+import { toast } from "react-toastify";
 
 const initialState = {
   firstname: "",
@@ -19,13 +20,21 @@ const AuthRegister = () => {
   const navigate = useNavigate();
 
   const onSubmit = async (event) => {
-    event.preventDefault(); 
+    event.preventDefault();
+
+    console.log(formData);
 
     try {
-      await dispatch(registerUser(formData)).unwrap();
+      await dispatch(registerUser(formData))
+        .unwrap()
+        .then((data) => {
+          console.log(data);
+        });
       navigate("/shop");
+      toast.success("Wellcome to Rilo Cloths");
     } catch (error) {
       console.error("Registration failed:", error);
+      toast.error(error?.message || "An error occured");
     }
   };
 
