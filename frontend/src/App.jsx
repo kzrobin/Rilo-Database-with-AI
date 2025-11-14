@@ -21,21 +21,25 @@ import store from "./store/store";
 import { checkAuth } from "./store/auth-slice";
 import { useEffect } from "react";
 
-import { ChatWidget } from './components/admin-view/Chatbot/ChatWidget';
+// import { ChatWidget } from './components/admin-view/Chatbot/ChatWidget';
 
 function App() {
-  const { isAuthenticated, user } = useSelector((state) => state.auth);
+  const { isAuthenticated, user, isLoading } = useSelector(
+    (state) => state.auth
+  );
 
   const dispatch = useDispatch();
-
   useEffect(() => {
     dispatch(checkAuth());
   }, [dispatch]);
 
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <div className="flex flex-col overflow-hidden bg-white ">
       <ToastContainer position="top-right" autoClose={3000} />
-      <h1>Header Component</h1>
       <Routes>
         <Route
           path="auth"
@@ -56,8 +60,8 @@ function App() {
             </CheckAuth>
           }
         >
-          <Route path="dashbroad" element={<AdminDashbroad />} />
-          <Route path="product" element={<AdminProduct />} />
+          <Route path="dashboard" element={<AdminDashbroad />} />
+          <Route path="products" element={<AdminProduct />} />
           <Route path="order" element={<AdminOrder />} />
         </Route>
 

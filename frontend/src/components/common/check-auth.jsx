@@ -5,6 +5,11 @@ function CheckAuth({ children }) {
   const { isAuthenticated, user } = useSelector((state) => state.auth);
   const location = useLocation();
 
+  console.log("Check-auth");
+  console.log(user);
+  console.log(location.pathname, isAuthenticated);
+  console.log("||||");
+
   // Default route
   if (location.pathname === "/") {
     if (!isAuthenticated) return <Navigate to="/auth/login" />;

@@ -40,6 +40,7 @@ router.post(
 
 router.post("/logout", authuser, logoutUser);
 router.get("/auth-user", authuser, (req, res, next) => {
+  console.log(req.user);
   return res.status(200).json({
     user: req.user,
   });
