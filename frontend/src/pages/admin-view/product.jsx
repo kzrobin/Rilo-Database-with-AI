@@ -114,6 +114,7 @@ const AdminProducts = () => {
                 formControls={addProductFormElements}
                 buttonText="Add"
                 onSubmit={onSubmit}
+                isBtnDisabled={imageLoadingState}
               />
             </div>
           </SheetHeader>
