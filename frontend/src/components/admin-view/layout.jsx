@@ -2,6 +2,7 @@ import { Outlet } from "react-router-dom";
 import AdminSideBar from "./sidebar";
 import AdminHeader from "./header";
 import { useState } from "react";
+import { ChatWidget } from "./Chatbot/ChatWidget";
 
 function AdminLayout() {
   const [openSidebar, setOpenSidebar] = useState(false);
@@ -13,10 +14,12 @@ function AdminLayout() {
       <div className="flex flex-1 flex-col">
         {/* admin header */}
         <AdminHeader setOpen={setOpenSidebar} />
+        <ChatWidget className=""/>
         <main className="flex-1 flex-col flex bg-muted/40 p-4 md:p-6">
           <Outlet />
         </main>
       </div>
+      
     </div>
   );
 }

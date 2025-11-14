@@ -21,6 +21,8 @@ import store from "./store/store";
 import { checkAuth } from "./store/auth-slice";
 import { useEffect } from "react";
 
+// import { ChatWidget } from './components/admin-view/Chatbot/ChatWidget';
+
 function App() {
   const { isAuthenticated, user, isLoading } = useSelector(
     (state) => state.auth
@@ -68,6 +70,7 @@ function App() {
           element={
             <CheckAuth isAuthenticated={isAuthenticated} user={user}>
               <ShoppingLayout />
+              
             </CheckAuth>
           }
         >
