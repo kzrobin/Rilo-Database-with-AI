@@ -125,12 +125,6 @@ export function ChatWidget() {
             )}
           </div>
 
-            <div className="min-h-screen bg-gray-100">
-      <ChatWidget />
-      <div className="flex items-center justify-center min-h-screen">
-        <p>Admin Dashboard - Chat widget available in bottom right</p>
-      </div>
-    </div>
           <div className="border-t border-gray-200 p-4 space-y-2">
             <ChatInput onSendMessage={handleSendMessage} isLoading={isLoading} />
             {messages.length > 0 && (
