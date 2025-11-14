@@ -35,11 +35,11 @@ function AdminProductTile({
         </CardContent>
         <CardFooter className="flex justify-between items-center">
           <Button
-          // onClick={() => {
-          //   setOpenCreateProductsDialog(true);
-          //   setCurrentEditedId(product?._id);
-          //   setFormData(product);
-          // }}
+            onClick={() => {
+              setOpenCreateProductsDialog(true);
+              setCurrentEditedId(product?._id);
+              setFormData(product);
+            }}
           >
             Edit
           </Button>

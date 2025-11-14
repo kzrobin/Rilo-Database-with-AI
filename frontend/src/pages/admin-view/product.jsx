@@ -33,7 +33,7 @@ const AdminProducts = () => {
   const [imageFile, setImageFile] = useState(null);
   const [uploadedImageUrl, setUploadedImageUrl] = useState("");
   const [imageLoadingState, setImageLoadingState] = useState(false);
-
+  const [currentEditedId, setCurrentEditedId] = useState(null);
   const { productsList } = useSelector((state) => state.adminProducts);
   const dispatch = useDispatch();
 
@@ -83,7 +83,13 @@ const AdminProducts = () => {
       <div className="grid gap-3 md:grid-cols-3 lg:grid-cols-4">
         {productsList && productsList.length > 0 ? (
           productsList.map((product) => (
-            <AdminProductTile key={product._id} product={product} />
+            <AdminProductTile
+              setCurrentEditedId={setCurrentEditedId}
+              setOpenCreateProductsDialog={setOpenCreateProductsDialog}
+              key={product._id}
+              product={product}
+              setFormData={setFormData}
+            />
           ))
         ) : (
           <div>No products found</div>
@@ -92,7 +98,12 @@ const AdminProducts = () => {
 
       <Sheet
         open={openCreateProductsDialog}
-        onOpenChange={(open) => setOpenCreateProductsDialog(open)}
+        onOpenChange={(open) => {
+          setOpenCreateProductsDialog(open);
+          setCurrentEditedId(null);
+          setFormData(initialFormData);
+          setImageFile(null);
+        }}
       >
         <SheetContent side="right" className="overflow-auto">
           <SheetHeader>
@@ -105,6 +116,8 @@ const AdminProducts = () => {
               setUploadedImageUrl={setUploadedImageUrl}
               imageLoadingState={imageLoadingState}
               setImageLoadingState={setImageLoadingState}
+              currentEditedId={currentEditedId}
+              isEdidtMode={currentEditedId !== null}
             />
 
             <div className="py-6">
