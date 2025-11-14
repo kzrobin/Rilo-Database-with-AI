@@ -29,7 +29,7 @@ const adminSidebarMenuItems = [
   },
 ];
 
-function MenuItems({ setOpen = true }) {
+function MenuItems({ open, setOpen = true }) {
   const navigate = useNavigate();
 
   return (
@@ -39,7 +39,7 @@ function MenuItems({ setOpen = true }) {
           key={menuItem.id}
           onClick={() => {
             navigate(menuItem.path);
-            setOpen ? setOpen(false) : null;
+            open ? setOpen(false) : null;
           }}
           className="flex cursor-pointer text-xl items-center gap-2 rounded-md px-3 py-2 text-muted-foreground hover:bg-muted hover:text-foreground"
         >

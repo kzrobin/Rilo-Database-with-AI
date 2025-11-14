@@ -101,51 +101,20 @@ const createProduct = async (req, res) => {
 // get all products
 const getAllProducts = async (req, res) => {
   try {
-    const {
-      page = 1,
-      limit = 10,
-      category,
-      brand,
-      minPrice,
-      maxPrice,
-      search,
-    } = req.query;
+    const products = await ProductModel.find();
 
-    const filter = {};
-
-    if (category) filter.category = category;
-    if (brand) filter.brand = brand;
-    if (search) filter.product_name = { $regex: search, $options: "i" };
-    if (minPrice || maxPrice) {
-      filter.price = {};
-      if (minPrice) filter.price.$gte = Number(minPrice);
-      if (maxPrice) filter.price.$lte = Number(maxPrice);
-    }
-
-    const skip = (page - 1) * limit;
-    const products = await ProductModel.find(filter)
-      .skip(skip)
-      .limit(Number(limit))
-      .sort({ createdAt: -1 });
-
-    const total = await ProductModel.countDocuments(filter);
-
-    res.json({
-      success: true,
-      pagination: {
-        page: Number(page),
-        limit: Number(limit),
-        total,
-        pages: Math.ceil(total / limit),
+    res.status(200).json({
+      status: "success",
+      results: products.length,
+      data: {
+        products,
       },
-      data: products,
     });
   } catch (error) {
-    console.error("Get products error:", error);
+    console.error("GET ALL PRODUCTS ERROR:", error);
     res.status(500).json({
-      success: false,
-      message: "Failed to fetch products.",
-      error: error.message,
+      status: "fail",
+      message: "An error occurred while fetching products.",
     });
   }
 };

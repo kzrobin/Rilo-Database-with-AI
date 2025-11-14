@@ -17,6 +17,7 @@ import {
   editProduct,
 } from "@/store/admin/products-slice";
 import { toast } from "react-toastify";
+import { CodeSquare } from "lucide-react";
 
 const initialFormData = {
   image: "",
@@ -41,8 +42,9 @@ const AdminProducts = () => {
 
   useEffect(() => {
     dispatch(fetchAllProducts());
+    console.log("Check product list");
     console.log(productsList);
-  }, [dispatch]);
+  }, []);
 
   const onSubmit = (event) => {
     event.preventDefault();
@@ -59,7 +61,7 @@ const AdminProducts = () => {
       addNewProduct({ ...preparedData, image: { url: uploadedImageUrl } })
     ).then((data) => {
       console.log(data);
-      imageFile(null);
+      setImageFile(null);
       setFormData({
         image: "",
         title: "",
@@ -70,6 +72,8 @@ const AdminProducts = () => {
         totalStock: 0,
       });
       dispatch(fetchAllProducts());
+      console.log(productsList);
+      setOpenCreateProductsDialog(false);
       toast.success("Product added Successfully");
     });
   };

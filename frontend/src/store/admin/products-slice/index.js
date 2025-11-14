@@ -25,6 +25,7 @@ export const fetchAllProducts = createAsyncThunk(
     const response = await axios.get(`${baseUrl}/admin/products`, {
       withCredentials: true,
     });
+    console.log(response.data);
     return response.data;
   }
 );
@@ -67,8 +68,8 @@ const adminProductsSlice = createSlice({
       .addCase(fetchAllProducts.fulfilled, (state, action) => {
         state.isLoading = false;
         state.productsList = action.payload.data?.products || [];
-        // console.log("All products");
-        // console.log(action.payload);
+        console.log("All products");
+        console.log(action.payload.data?.products);
       })
       .addCase(fetchAllProducts.rejected, (state) => {
         state.isLoading = false;

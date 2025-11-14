@@ -21,8 +21,8 @@ app.use(
     origin: process.env.FRONTEMD_URL.split(","),
     credentials: true,
   })
-);
-
+); 
+    
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
@@ -35,6 +35,7 @@ app.use("/api/products", productRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/orders", orderRouter);
 app.use("/api/ai-query", aiQueryRouter);
+// app.use("/api/reviews", reviewRouter);
 
 // --- Global Error Handling Middleware ---
 app.use((err, req, res, next) => {
