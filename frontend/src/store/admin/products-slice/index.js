@@ -8,9 +8,6 @@ const initialState = {
   isLoading: false,
 };
 
-// =======================
-// Async Thunks
-// =======================
 
 // Add New Product
 export const addNewProduct = createAsyncThunk(
@@ -62,7 +59,7 @@ export const editProduct = createAsyncThunk(
 // Delete Product
 export const deleteProduct = createAsyncThunk(
   "products/deleteProduct",
-  async (id, { rejectWithValue }) => {
+  async ({ id, rejectWithValue }) => {
     try {
       const response = await axios.delete(`${baseUrl}/admin/products/${id}`, {
         withCredentials: true,
@@ -74,9 +71,6 @@ export const deleteProduct = createAsyncThunk(
   }
 );
 
-// =======================
-// Slice
-// =======================
 
 const adminProductsSlice = createSlice({
   name: "adminProducts",

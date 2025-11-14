@@ -6,6 +6,7 @@ function AdminProductTile({
   setFormData,
   setOpenCreateProductsDialog,
   setCurrentEditedId,
+  setUploadedImageUrl,
   handleDelete,
 }) {
   return (
@@ -39,15 +40,12 @@ function AdminProductTile({
               setOpenCreateProductsDialog(true);
               setCurrentEditedId(product?._id);
               setFormData(product);
+              setUploadedImageUrl(product.image.url);
             }}
           >
             Edit
           </Button>
-          <Button
-          // onClick={() => handleDelete(product?._id)}
-          >
-            Delete
-          </Button>
+          <Button onClick={() => handleDelete(product?._id)}>Delete</Button>
         </CardFooter>
       </div>
     </Card>

@@ -10,7 +10,12 @@ import React, { Fragment, useEffect, useState } from "react";
 import { addProductFormElements } from "@/config";
 import ProductImageUpload from "@/components/admin-view/image-upload";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchAllProducts, addNewProduct } from "@/store/admin/products-slice";
+import {
+  fetchAllProducts,
+  addNewProduct,
+  editProduct,
+  deleteProduct,
+} from "@/store/admin/products-slice";
 import { toast } from "react-toastify";
 
 import AdminProductTile from "@/components/admin-view/product-tile";
@@ -53,22 +58,48 @@ const AdminProducts = () => {
       totalStock: Number(formData.totalStock) || 0,
     };
 
-    dispatch(addNewProduct(preparedData)).then((res) => {
-      if (res.meta.requestStatus === "fulfilled") {
-        toast.success("Product added successfully");
+    currentEditedId !== null
+      ? dispatch(editProduct({ id: currentEditedId, formData })).then(
+          (data) => {
+            console.log(data);
+            console.log(formData);
+            setOpenCreateProductsDialog(false);
+            setCurrentEditedId(null);
 
-        // Reset everything
-        setImageFile(null);
-        setUploadedImageUrl("");
-        setFormData(initialFormData);
+            // Reset everything
+            setImageFile(null);
+            setUploadedImageUrl("");
+            setFormData(initialFormData);
 
-        // Refresh list
-        dispatch(fetchAllProducts());
+            // Refresh list
+            dispatch(fetchAllProducts());
+            toast("Prodct Edited Successfully");
+          }
+        )
+      : dispatch(addNewProduct(preparedData)).then((res) => {
+          if (res.meta.requestStatus === "fulfilled") {
+            toast.success("Product added successfully");
 
-        setOpenCreateProductsDialog(false);
-      } else {
-        toast.error("Failed to add product");
-      }
+            // Reset everything
+            setImageFile(null);
+            setUploadedImageUrl("");
+            setFormData(initialFormData);
+
+            // Refresh list
+            dispatch(fetchAllProducts());
+            setOpenCreateProductsDialog(false);
+          } else {
+            toast.error("Failed to add product");
+          }
+        });
+  };
+
+  const handleDelete = (productId) => {
+    console.log(productId);
+    dispatch(deleteProduct({ id: productId })).then((data) => {
+      console.log(data);
+      dispatch(fetchAllProducts());
+      toast.success("Product deleted Successfully");
     });
   };
 
@@ -76,7 +107,7 @@ const AdminProducts = () => {
     <Fragment>
       <div className="mb-5 w-full flex justify-end">
         <Button onClick={() => setOpenCreateProductsDialog(true)}>
-          Add new product
+          Add product
         </Button>
       </div>
 
@@ -89,6 +120,8 @@ const AdminProducts = () => {
               key={product._id}
               product={product}
               setFormData={setFormData}
+              setUploadedImageUrl={setUploadedImageUrl}
+              handleDelete={handleDelete}
             />
           ))
         ) : (
@@ -103,11 +136,14 @@ const AdminProducts = () => {
           setCurrentEditedId(null);
           setFormData(initialFormData);
           setImageFile(null);
+          setUploadedImageUrl("");
         }}
       >
         <SheetContent side="right" className="overflow-auto">
           <SheetHeader>
-            <SheetTitle>Add new Product</SheetTitle>
+            <SheetTitle>
+              {currentEditedId !== null ? "Edit Product" : "Add new product"}
+            </SheetTitle>
 
             <ProductImageUpload
               imageFile={imageFile}
@@ -125,7 +161,7 @@ const AdminProducts = () => {
                 formData={formData}
                 setFormData={setFormData}
                 formControls={addProductFormElements}
-                buttonText="Add"
+                buttonText={currentEditedId !== null ? "Edit" : "Add"}
                 onSubmit={onSubmit}
                 isBtnDisabled={imageLoadingState}
               />

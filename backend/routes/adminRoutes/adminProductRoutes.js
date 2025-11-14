@@ -95,12 +95,12 @@ router.get("/products/:id", getProductById);
 router.put(
   "/products/:id",
   [
-    body("product_name")
+    body("title")
       .optional()
       .isString()
       .trim()
       .notEmpty()
-      .withMessage("Product name cannot be empty."),
+      .withMessage("Product title cannot be empty."),
     body("description")
       .optional()
       .isString()
@@ -113,13 +113,6 @@ router.put(
       .trim()
       .notEmpty()
       .withMessage("Category cannot be empty."),
-    body("brand")
-      .optional()
-      .isString()
-      .trim()
-      .notEmpty()
-      .withMessage("Brand cannot be empty."),
-
     body("price")
       .optional()
       .isFloat({ min: 0 })
@@ -132,7 +125,6 @@ router.put(
       .optional()
       .isInt({ min: 0 })
       .withMessage("Stock must be a non-negative integer."),
-
     body("image").optional().isObject(),
     body("image.url")
       .optional()
