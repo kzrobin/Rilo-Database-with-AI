@@ -4,9 +4,9 @@ const FebricModel = require("./fabricModel");
 
 const productSchema = new Schema(
   {
-    product_name: {
+    title: {
       type: String,
-      required: [true, "Product name is required."],
+      required: [true, "Title name is required."],
       trim: true,
     },
     description: {
@@ -17,11 +17,6 @@ const productSchema = new Schema(
     category: {
       type: String,
       required: [true, "Category is required."],
-      trim: true,
-    },
-    brand: {
-      type: String,
-      required: [true, "Brand is required."],
       trim: true,
     },
     price: {

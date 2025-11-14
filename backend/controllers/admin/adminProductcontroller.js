@@ -1,6 +1,7 @@
 // controllers/productController.js
-const ProductModel = require("../models/productModel");
-const imageUploadUtil = require("../utils/cloudinary");
+const ProductModel = require("../../models/productModel");
+const { imageUploadUtil } = require("../../utils/cloudinary");
+const { validationResult } = require("express-validator");
 
 const allowedFields = [
   "product_name",
@@ -48,10 +49,38 @@ const handleImageUpload = async (req, res) => {
 };
 
 //  create product
+
 const createProduct = async (req, res) => {
   try {
-    const data = pick(req.body, allowedFields);
-    const product = new ProductModel(data);
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        success: false,
+        message: "Validation failed.",
+        errors: errors.array(),
+      });
+    }
+
+    const {
+      title,
+      category,
+      price,
+      salePrice,
+      image,
+      description,
+      totalStock,
+    } = req.body;
+
+    const product = new ProductModel({
+      title,
+      category,
+      description,
+      image: image ? { url: image.url } : undefined,
+      price: Number(price),
+      salePrice: Number(salePrice || 0),
+      totalStock: Number(totalStock || 0),
+    });
+
     await product.save();
 
     res.status(201).json({
@@ -61,7 +90,7 @@ const createProduct = async (req, res) => {
     });
   } catch (error) {
     console.error("Create product error:", error);
-    res.status(400).json({
+    res.status(500).json({
       success: false,
       message: "Failed to create product.",
       error: error.message,
@@ -72,51 +101,20 @@ const createProduct = async (req, res) => {
 // get all products
 const getAllProducts = async (req, res) => {
   try {
-    const {
-      page = 1,
-      limit = 10,
-      category,
-      brand,
-      minPrice,
-      maxPrice,
-      search,
-    } = req.query;
+    const products = await ProductModel.find();
 
-    const filter = {};
-
-    if (category) filter.category = category;
-    if (brand) filter.brand = brand;
-    if (search) filter.product_name = { $regex: search, $options: "i" };
-    if (minPrice || maxPrice) {
-      filter.price = {};
-      if (minPrice) filter.price.$gte = Number(minPrice);
-      if (maxPrice) filter.price.$lte = Number(maxPrice);
-    }
-
-    const skip = (page - 1) * limit;
-    const products = await ProductModel.find(filter)
-      .skip(skip)
-      .limit(Number(limit))
-      .sort({ createdAt: -1 });
-
-    const total = await ProductModel.countDocuments(filter);
-
-    res.json({
-      success: true,
-      pagination: {
-        page: Number(page),
-        limit: Number(limit),
-        total,
-        pages: Math.ceil(total / limit),
+    res.status(200).json({
+      status: "success",
+      results: products.length,
+      data: {
+        products,
       },
-      data: products,
     });
   } catch (error) {
-    console.error("Get products error:", error);
+    console.error("GET ALL PRODUCTS ERROR:", error);
     res.status(500).json({
-      success: false,
-      message: "Failed to fetch products.",
-      error: error.message,
+      status: "fail",
+      message: "An error occurred while fetching products.",
     });
   }
 };
@@ -173,7 +171,6 @@ const updateProduct = async (req, res) => {
     });
   }
 };
-
 
 // delete products
 const deleteProduct = async (req, res) => {

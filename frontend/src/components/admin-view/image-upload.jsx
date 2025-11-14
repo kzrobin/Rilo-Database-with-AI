@@ -1,122 +1,127 @@
-import { FileIcon, UploadCloudIcon, XIcon } from "lucide-react";
+import { Label } from "@radix-ui/react-label";
+import React, { useEffect, useRef } from "react";
 import { Input } from "../ui/input";
-import { Label } from "../ui/label";
-import { useEffect, useRef } from "react";
+import { FileIcon, UploadCloud, XIcon } from "lucide-react";
 import { Button } from "../ui/button";
+import { toast } from "react-toastify";
 import axios from "axios";
 import { Skeleton } from "../ui/skeleton";
 
-function ProductImageUpload({
+const ProductImageUpload = ({
   imageFile,
   setImageFile,
-  imageLoadingState,
   uploadedImageUrl,
   setUploadedImageUrl,
+  imageLoadingState = false,
   setImageLoadingState,
-  isEditMode,
-  isCustomStyling = false,
-}) {
+}) => {
   const inputRef = useRef(null);
+  const baseUrl = import.meta.env.VITE_BASE_URL;
 
-  console.log(isEditMode, "isEditMode");
+  const handleImageFileChange = (event) => {
+    console.log(event.target.files);
 
-  function handleImageFileChange(event) {
-    console.log(event.target.files, "event.target.files");
-    const selectedFile = event.target.files?.[0];
-    console.log(selectedFile);
-
+    const selectedFile = event.target.files?.[0] || null;
     if (selectedFile) setImageFile(selectedFile);
-  }
+  };
 
-  function handleDragOver(event) {
+  const handleDragOver = (event) => {
     event.preventDefault();
-  }
-
-  function handleDrop(event) {
+  };
+  const handleDrop = (event) => {
     event.preventDefault();
     const droppedFile = event.dataTransfer.files?.[0];
     if (droppedFile) setImageFile(droppedFile);
-  }
+  };
 
-  function handleRemoveImage() {
+  const handleImageRemove = () => {
     setImageFile(null);
     if (inputRef.current) {
       inputRef.current.value = "";
     }
-  }
-
-  async function uploadImageToCloudinary() {
-    setImageLoadingState(true);
-    const data = new FormData();
-    data.append("my_file", imageFile);
-    const response = await axios.get(
-      `${baseUrl}/admin/products/upload-image`,
-      data
-    );
-    console.log(response, "response");
-
-    if (response?.data?.success) {
-      setUploadedImageUrl(response.data.result.url);
-      setImageLoadingState(false);
-    }
-  }
+  };
 
   useEffect(() => {
-    if (imageFile !== null) uploadImageToCloudinary();
+    const uploadImage = async () => {
+      if (imageFile !== null) {
+        try {
+          setImageLoadingState(true);
+          const data = new FormData();
+          data.append("my_file", imageFile);
+          const response = await axios.post(
+            `${baseUrl}/admin/upload-image`,
+            data
+          );
+
+          console.log(response);
+          if (response?.data?.result?.url) {
+            setUploadedImageUrl(response.data.result.url);
+            setImageLoadingState(false);
+          }
+        } catch (error) {
+          toast.error("Failed to upload image");
+          setImageFile(null);
+          setUploadedImageUrl("");
+          setImageLoadingState(false);
+          // console.log(error);
+        }
+      } else {
+        setUploadedImageUrl("");
+        setImageLoadingState(false);
+      }
+    };
+
+    uploadImage();
   }, [imageFile]);
 
   return (
-    <div
-      className={`w-full  mt-4 ${isCustomStyling ? "" : "max-w-md mx-auto"}`}
-    >
-      <Label className="text-lg font-semibold mb-2 block">Upload Image</Label>
+    <div className="w-full max-w-md max-w-auto mt-4">
+      <Label className="text-lg font-semibold mb-2 block text-center">
+        Upload Image
+      </Label>
       <div
         onDragOver={handleDragOver}
         onDrop={handleDrop}
-        className={`${
-          isEditMode ? "opacity-60" : ""
-        } border-2 border-dashed rounded-lg p-4`}
+        className="border-2 border-dashed rounded-lg p-4"
       >
         <Input
-          id=""
           type="file"
+          id="image-upload"
           className="hidden"
           ref={inputRef}
           onChange={handleImageFileChange}
-          disabled={isEditMode}
         />
+
         {!imageFile ? (
           <Label
-            htmlFor=""
-            className={`${
-              isEditMode ? "cursor-not-allowed" : ""
-            } flex flex-col items-center justify-center h-32 cursor-pointer`}
+            htmlFor="image-upload"
+            className="flex flex-col items-center justify-center h-32 cursor-pointer"
           >
-            <UploadCloudIcon className="w-10 h-10 text-muted-foreground mb-2" />
-            <span>Drag & drop or click to upload image</span>
+            <UploadCloud className="w-10 h-10" />
+            <span className="">Drag & drop or Click to upload image</span>
           </Label>
         ) : imageLoadingState ? (
           <Skeleton className="h-10 bg-gray-100" />
         ) : (
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-center">
             <div className="flex items-center">
-              <FileIcon className="w-8 text-primary mr-2 h-8" />
+              <FileIcon className="w-7 text-primary mr-2 h-8" />
             </div>
             <p className="text-sm font-medium">{imageFile.name}</p>
             <Button
-              variant="ghost"
-              size="icon"
-              className="text-muted-foreground hover:text-foreground"
-              onClick={handleRemoveImage}
+              variant={"ghost"}
+              size={"icon"}
+              className="text-muted-foreground hover:text-foreground ml-3.5"
+              onClick={handleImageRemove}
             >
-              <XIcon className="w-4 h-4" />
-              <span className="sr-only">Remove File</span>
+              <XIcon className="w-3 h-3 " />
+              <span className="sr-only ml-3.5">Remove file</span>
             </Button>
           </div>
         )}
       </div>
     </div>
   );
-}
+};
 
 export default ProductImageUpload;

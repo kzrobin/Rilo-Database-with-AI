@@ -10,7 +10,7 @@ const productRoutes = require("./routes/productRoutes");
 const cartRoutes = require("./routes/cartRoutes");
 const orderRouter = require("./routes/orderRoutes");
 const aiQueryRouter = require("./routes/aiQueryRoutes");
-const adminProductsRouter = require("./routes/adminProductRoutes");
+const adminProductsRouter = require("./routes/adminRoutes/adminProductRoutes");
 
 const connectToDB = require("./db/db");
 const cookieParser = require("cookie-parser");
@@ -35,7 +35,7 @@ app.use("/api/products", productRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/orders", orderRouter);
 app.use("/api/ai-query", aiQueryRouter);
-app.use("/api/reviews", reviewRouter);
+// app.use("/api/reviews", reviewRouter);
 
 // --- Global Error Handling Middleware ---
 app.use((err, req, res, next) => {
