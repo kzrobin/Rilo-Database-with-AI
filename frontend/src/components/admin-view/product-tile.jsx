@@ -13,7 +13,7 @@ function AdminProductTile({
       <div>
         <div className="relative">
           <img
-            src={product?.image}
+            src={product?.image.url}
             alt={product?.title}
             className="w-full h-[300px] object-cover rounded-t-lg"
           />
@@ -35,15 +35,19 @@ function AdminProductTile({
         </CardContent>
         <CardFooter className="flex justify-between items-center">
           <Button
-            onClick={() => {
-              setOpenCreateProductsDialog(true);
-              setCurrentEditedId(product?._id);
-              setFormData(product);
-            }}
+          // onClick={() => {
+          //   setOpenCreateProductsDialog(true);
+          //   setCurrentEditedId(product?._id);
+          //   setFormData(product);
+          // }}
           >
             Edit
           </Button>
-          <Button onClick={() => handleDelete(product?._id)}>Delete</Button>
+          <Button
+          // onClick={() => handleDelete(product?._id)}
+          >
+            Delete
+          </Button>
         </CardFooter>
       </div>
     </Card>
