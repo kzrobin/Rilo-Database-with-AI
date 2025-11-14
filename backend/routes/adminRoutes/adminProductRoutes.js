@@ -7,8 +7,8 @@ const {
   getProductById,
   updateProduct,
   deleteProduct,
-} = require("../controllers/productController");
-const { upload } = require("../utils/cloudinary");
+} = require("../../controllers/admin/adminProductcontroller");
+const { upload } = require("../../utils/cloudinary");
 const { body, validationResult } = require("express-validator");
 
 const router = express.Router();
@@ -29,16 +29,30 @@ const validate = (req, res, next) => {
   next();
 };
 
-router.post("/upload-image", upload.single("my_file"), handleImageUpload);
+// upload image
+router.post(
+  "/upload-image",
+  async (req, res, next) => {
+    console.log(req.file);
+    next();
+  },
+  upload.single("my_file"),
+  handleImageUpload
+);
 
+// add products
 router.post(
   "/products",
+  (req, res, next) => {
+    console.log(req.body);
+    next();
+  },
   [
-    body("product_name")
+    body("title")
       .isString()
       .trim()
       .notEmpty()
-      .withMessage("Product name is required."),
+      .withMessage("Title is required."),
     body("description")
       .isString()
       .trim()
@@ -49,12 +63,6 @@ router.post(
       .trim()
       .notEmpty()
       .withMessage("Category is required."),
-    body("brand")
-      .isString()
-      .trim()
-      .notEmpty()
-      .withMessage("Brand is required."),
-
     body("price")
       .isFloat({ min: 0 })
       .withMessage("Price must be a positive number."),
@@ -77,8 +85,13 @@ router.post(
   createProduct
 );
 
+// get all products
 router.get("/products", getAllProducts);
+
+// get products by id
 router.get("/products/:id", getProductById);
+// edit product by id
+
 router.put(
   "/products/:id",
   [
@@ -132,7 +145,7 @@ router.put(
   validate,
   updateProduct
 );
-
+// delete products by id
 router.delete("/products/:id", deleteProduct);
 
 module.exports = router;

@@ -1,6 +1,7 @@
 // controllers/productController.js
-const ProductModel = require("../models/productModel");
-const imageUploadUtil = require("../utils/cloudinary");
+const ProductModel = require("../../models/productModel");
+const { imageUploadUtil } = require("../../utils/cloudinary");
+const { validationResult } = require("express-validator");
 
 const allowedFields = [
   "product_name",
@@ -48,10 +49,38 @@ const handleImageUpload = async (req, res) => {
 };
 
 //  create product
+
 const createProduct = async (req, res) => {
   try {
-    const data = pick(req.body, allowedFields);
-    const product = new ProductModel(data);
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        success: false,
+        message: "Validation failed.",
+        errors: errors.array(),
+      });
+    }
+
+    const {
+      title,
+      category,
+      price,
+      salePrice,
+      image,
+      description,
+      totalStock,
+    } = req.body;
+
+    const product = new ProductModel({
+      title,
+      category,
+      description,
+      image: image ? { url: image.url } : undefined,
+      price: Number(price),
+      salePrice: Number(salePrice || 0),
+      totalStock: Number(totalStock || 0),
+    });
+
     await product.save();
 
     res.status(201).json({
@@ -61,7 +90,7 @@ const createProduct = async (req, res) => {
     });
   } catch (error) {
     console.error("Create product error:", error);
-    res.status(400).json({
+    res.status(500).json({
       success: false,
       message: "Failed to create product.",
       error: error.message,
@@ -173,7 +202,6 @@ const updateProduct = async (req, res) => {
     });
   }
 };
-
 
 // delete products
 const deleteProduct = async (req, res) => {

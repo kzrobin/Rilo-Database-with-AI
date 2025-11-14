@@ -10,7 +10,7 @@ const productRoutes = require("./routes/productRoutes");
 const cartRoutes = require("./routes/cartRoutes");
 const orderRouter = require("./routes/orderRoutes");
 const aiQueryRouter = require("./routes/aiQueryRoutes");
-const adminProductsRouter = require("./routes/adminProductRoutes");
+const adminProductsRouter = require("./routes/adminRoutes/adminProductRoutes");
 
 const connectToDB = require("./db/db");
 const cookieParser = require("cookie-parser");
