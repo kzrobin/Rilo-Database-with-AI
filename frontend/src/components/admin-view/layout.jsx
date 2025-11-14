@@ -3,6 +3,8 @@ import AdminSideBar from "./sidebar";
 import AdminHeader from "./header";
 import { useState } from "react";
 import { ChatWidget } from "./Chatbot/ChatWidget";
+import { ChatMessage } from "./Chatbot/ChatMessage";
+import { ChatInput } from "./Chatbot/ChatInput";
 
 function AdminLayout() {
   const [openSidebar, setOpenSidebar] = useState(false);
@@ -14,7 +16,10 @@ function AdminLayout() {
       <div className="flex flex-1 flex-col">
         {/* admin header */}
         <AdminHeader setOpen={setOpenSidebar} />
-        <ChatWidget className=""/>
+        <ChatWidget/>
+        {/* <ChatInput/>
+        <ChatMessage/> */}
+
         <main className="flex-1 flex-col flex bg-muted/40 p-4 md:p-6">
           <Outlet />
         </main>

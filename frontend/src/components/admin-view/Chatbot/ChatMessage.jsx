@@ -1,7 +1,14 @@
-import { useEffect } from 'react';
 
 export function ChatMessage({ message }) {
   const isUser = message.sender === 'user';
+
+  const formatTime = (timestamp) => {
+    const date = typeof timestamp === 'string' ? new Date(timestamp) : timestamp;
+    return date.toLocaleTimeString([], {
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  };
 
   return (
     <div className={`flex ${isUser ? 'justify-end' : 'justify-start'} mb-4`}>
@@ -14,10 +21,7 @@ export function ChatMessage({ message }) {
       >
         <p className="text-sm break-words">{message.text}</p>
         <span className={`text-xs mt-1 block ${isUser ? 'text-blue-100' : 'text-gray-600'}`}>
-          {message.timestamp.toLocaleTimeString([], {
-            hour: '2-digit',
-            minute: '2-digit',
-          })}
+          {formatTime(message.timestamp)}
         </span>
       </div>
     </div>
