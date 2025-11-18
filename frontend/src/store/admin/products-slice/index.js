@@ -8,7 +8,6 @@ const initialState = {
   isLoading: false,
 };
 
-
 // Add New Product
 export const addNewProduct = createAsyncThunk(
   "products/addNewProduct",
@@ -70,7 +69,6 @@ export const deleteProduct = createAsyncThunk(
     }
   }
 );
-
 
 const adminProductsSlice = createSlice({
   name: "adminProducts",
