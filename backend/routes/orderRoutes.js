@@ -4,7 +4,7 @@ const {
   getMyOrders,
   getOrderById,
   updateOrderStatus,
-} = require("../controllers/orderController");
+} = require("../controllers/admin/orderController");
 const authMiddleware = require("../middleware/authUser");
 // You can create this simple middleware to protect admin routes
 const { restrictToAdmin } = require("../middleware/roleMiddleware");
