@@ -4,7 +4,7 @@ const { imageUploadUtil } = require("../../utils/cloudinary");
 const { validationResult } = require("express-validator");
 
 const allowedFields = [
-  "product_name",
+  "title",
   "description",
   "category",
   "brand",
@@ -49,7 +49,6 @@ const handleImageUpload = async (req, res) => {
 };
 
 //  create product
-
 const createProduct = async (req, res) => {
   try {
     const errors = validationResult(req);
@@ -101,7 +100,7 @@ const createProduct = async (req, res) => {
 // get all products
 const getAllProducts = async (req, res) => {
   try {
-    const products = await ProductModel.find();
+    const products = await ProductModel.find().sort({ createdAt: -1 });
 
     res.status(200).json({
       status: "success",
@@ -146,10 +145,15 @@ const updateProduct = async (req, res) => {
   try {
     const data = pick(req.body, allowedFields);
 
+    console.log(req.body);
+
     const updated = await ProductModel.findByIdAndUpdate(req.params.id, data, {
       new: true,
       runValidators: true,
     });
+
+    console.log("updated");
+    console.log(updated);
 
     if (!updated) {
       return res

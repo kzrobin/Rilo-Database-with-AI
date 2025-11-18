@@ -43,10 +43,6 @@ router.post(
 // add products
 router.post(
   "/products",
-  (req, res, next) => {
-    console.log(req.body);
-    next();
-  },
   [
     body("title")
       .isString()
@@ -86,21 +82,21 @@ router.post(
 );
 
 // get all products
-router.get("/products", getAllProducts);
+router.get("/", getAllProducts);
 
 // get products by id
-router.get("/products/:id", getProductById);
+router.get("/:id", getProductById);
 // edit product by id
 
 router.put(
   "/products/:id",
   [
-    body("product_name")
+    body("title")
       .optional()
       .isString()
       .trim()
       .notEmpty()
-      .withMessage("Product name cannot be empty."),
+      .withMessage("Product title cannot be empty."),
     body("description")
       .optional()
       .isString()
@@ -113,13 +109,6 @@ router.put(
       .trim()
       .notEmpty()
       .withMessage("Category cannot be empty."),
-    body("brand")
-      .optional()
-      .isString()
-      .trim()
-      .notEmpty()
-      .withMessage("Brand cannot be empty."),
-
     body("price")
       .optional()
       .isFloat({ min: 0 })
@@ -132,7 +121,6 @@ router.put(
       .optional()
       .isInt({ min: 0 })
       .withMessage("Stock must be a non-negative integer."),
-
     body("image").optional().isObject(),
     body("image.url")
       .optional()
@@ -146,6 +134,6 @@ router.put(
   updateProduct
 );
 // delete products by id
-router.delete("/products/:id", deleteProduct);
+router.delete("/:id", deleteProduct);
 
 module.exports = router;

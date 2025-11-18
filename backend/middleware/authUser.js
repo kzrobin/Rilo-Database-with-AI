@@ -19,15 +19,14 @@ const authuser = async (req, res, next) => {
   try {
     const decode = jwt.verify(token, process.env.JWT_SECRET);
     const user = await userModel.findById(decode._id);
-
     const userData = {
       _id: user._id,
       fullname: user.fullname,
       email: user.email,
       role: user.role,
+      profilePicture: user.profilePicture,
     };
     req.user = userData;
-    // console.log("Authenticated User:", req.user);
     return next();
   } catch (err) {
     return res.status(401).json({ message: "Unauthorized access" });

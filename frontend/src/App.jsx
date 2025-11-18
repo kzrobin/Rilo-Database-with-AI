@@ -20,6 +20,7 @@ import { useDispatch, useSelector } from "react-redux";
 import store from "./store/store";
 import { checkAuth } from "./store/auth-slice";
 import { useEffect } from "react";
+import ShoppingHome from "./pages/shopping-view/home";
 
 // import { ChatWidget } from './components/admin-view/Chatbot/ChatWidget';
 
@@ -70,10 +71,10 @@ function App() {
           element={
             <CheckAuth isAuthenticated={isAuthenticated} user={user}>
               <ShoppingLayout />
-              
             </CheckAuth>
           }
         >
+          <Route path="home" element={<ShoppingHome />} />
           <Route path="listing" element={<ShoppingListing />} />
           <Route path="account" element={<ShoppingAccount />} />
           <Route path="checkout" element={<ShoppingCheckout />} />

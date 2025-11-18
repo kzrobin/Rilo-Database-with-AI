@@ -14,15 +14,11 @@ const reviewSchema = new Schema(
       required: [true, "Review description is required."],
       trim: true,
     },
-
-    // The product that this review belongs to
     product_id: {
       type: Schema.Types.ObjectId,
       ref: "Product",
       required: true,
     },
-
-    // The user who wrote the review
     user_id: {
       type: Schema.Types.ObjectId,
       ref: "User",

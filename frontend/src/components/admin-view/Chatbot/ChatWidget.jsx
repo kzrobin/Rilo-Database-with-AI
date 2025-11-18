@@ -1,16 +1,19 @@
-import { useState, useRef, useEffect } from 'react';
-import { X, MessageSquare, Loader } from 'lucide-react';
-import { ChatMessage } from './ChatMessage';
-import { ChatInput } from './ChatInput';
+import { useState, useRef, useEffect } from "react";
+import { X, MessageSquare, Loader } from "lucide-react";
+import { ChatMessage } from "./ChatMessage";
+import { ChatInput } from "./ChatInput";
+import axios from "axios";
 
 export function ChatWidget() {
+  const baseUrl = import.meta.env.VITE_BASE_URL;
+
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
   useEffect(() => {
@@ -21,32 +24,28 @@ export function ChatWidget() {
     const userMsg = {
       id: Date.now().toString(),
       text: userMessage,
-      sender: 'user',
+      sender: "user",
       timestamp: new Date(),
     };
 
     setMessages((prev) => [...prev, userMsg]);
     setIsLoading(true);
 
+    console.log(userMessage);
+
     try {
-      const response = await fetch('/api/chatbot', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ query: userMessage }),
-      });
+      const response = await axios.post(
+        `${baseUrl}/ai-query`,
+        { message: userMessage },
+        { withCredentials: true }
+      );
 
-      if (!response.ok) {
-        throw new Error('Failed to process query');
-      }
-
-      const data = await response.json();
+      const data = response.data;
 
       const botMsg = {
         id: (Date.now() + 1).toString(),
-        text: data.result || 'No results found',
-        sender: 'bot',
+        text: data.answer || "No answer returned",
+        sender: "bot",
         timestamp: new Date(),
       };
 
@@ -54,8 +53,8 @@ export function ChatWidget() {
     } catch (err) {
       const errorMsg = {
         id: (Date.now() + 1).toString(),
-        text: `Error: ${err.message || 'Unable to process your query. Please try again.'}`,
-        sender: 'bot',
+        text: `Error: ${err.message}`,
+        sender: "bot",
         timestamp: new Date(),
       };
       setMessages((prev) => [...prev, errorMsg]);
@@ -85,7 +84,9 @@ export function ChatWidget() {
           <div className="flex items-center justify-between bg-blue-600 text-white p-4 rounded-t-lg">
             <div>
               <h3 className="font-semibold">Business Analytics</h3>
-              <p className="text-xs text-blue-100">Ask any query about your orders</p>
+              <p className="text-xs text-blue-100">
+                Ask any query about your orders
+              </p>
             </div>
             <button
               onClick={() => {
@@ -103,8 +104,13 @@ export function ChatWidget() {
             {messages.length === 0 ? (
               <div className="flex items-center justify-center h-full text-center">
                 <div className="text-gray-500">
-                  <MessageSquare size={32} className="mx-auto mb-2 opacity-50" />
-                  <p className="text-sm">Start by asking about your business metrics</p>
+                  <MessageSquare
+                    size={32}
+                    className="mx-auto mb-2 opacity-50"
+                  />
+                  <p className="text-sm">
+                    Start by asking about your business metrics
+                  </p>
                 </div>
               </div>
             ) : (
@@ -126,7 +132,10 @@ export function ChatWidget() {
           </div>
 
           <div className="border-t border-gray-200 p-4 space-y-2">
-            <ChatInput onSendMessage={handleSendMessage} isLoading={isLoading} />
+            <ChatInput
+              onSendMessage={handleSendMessage}
+              isLoading={isLoading}
+            />
             {messages.length > 0 && (
               <button
                 onClick={handleClearChat}

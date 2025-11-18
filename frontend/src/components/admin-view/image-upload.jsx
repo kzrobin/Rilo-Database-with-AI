@@ -14,6 +14,7 @@ const ProductImageUpload = ({
   setUploadedImageUrl,
   imageLoadingState = false,
   setImageLoadingState,
+  isEditMode,
 }) => {
   const inputRef = useRef(null);
   const baseUrl = import.meta.env.VITE_BASE_URL;
@@ -90,6 +91,7 @@ const ProductImageUpload = ({
           className="hidden"
           ref={inputRef}
           onChange={handleImageFileChange}
+          disabled={isEditMode}
         />
 
         {!imageFile ? (
