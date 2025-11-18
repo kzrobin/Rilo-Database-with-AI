@@ -1,6 +1,6 @@
-const Order = require("../models/orderModel");
-const Cart = require("../models/cartModel");
-const Product = require("../models/productModel");
+const Order = require("../../models/orderModel");
+const Cart = require("../../models/cartModel");
+const Product = require("../../models/productModel");
 
 const createOrder = async (req, res) => {
   try {
@@ -132,13 +132,6 @@ const getOrderById = async (req, res) => {
   }
 };
 
-// --- ADMIN ONLY FUNCTIONS ---
-
-/**
- * @desc    Update order status (e.g., to "Shipped")
- * @route   PATCH /api/orders/:id/status
- * @access  Private/Admin
- */
 const updateOrderStatus = async (req, res) => {
   try {
     const { status } = req.body;

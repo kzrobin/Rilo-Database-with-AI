@@ -18,6 +18,7 @@ const productSchema = new Schema(
       type: String,
       required: [true, "Category is required."],
       trim: true,
+      enum: ["men", "women", "", "accessories", "kids"],
     },
     price: {
       type: Number,

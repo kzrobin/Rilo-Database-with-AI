@@ -42,7 +42,7 @@ router.post(
 
 // add products
 router.post(
-  "/products",
+  "/",
   [
     body("title")
       .isString()

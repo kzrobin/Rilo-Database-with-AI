@@ -72,14 +72,33 @@ const createProduct = async (req, res) => {
     });
   }
 };
-
 const getAllProducts = async (req, res) => {
   try {
-    const products = await Product.find();
-    // .populate(
-    //   "fabric_id",
-    //   "fabric_name material color"
-    // );
+    const filter = {};
+    // Filter by category (e.g., ?category=men,kids)
+    if (req.query.category) {
+      const categories = req.query.category.split(",");
+      // Using $in to match any of the provided categories
+      filter.category = { $in: categories };
+    }
+    // You can add more filters here, e.g., price range
+    // if (req.query.minPrice) { ... }
+
+    // Start building the Mongoose query
+    let query = Product.find(filter);
+
+    // --- 2. SORTING ---
+    // Sort by a field (e.g., ?sort=price for ascending, ?sort=-price for descending)
+    if (req.query.sort) {
+      const sortBy = req.query.sort.split(",").join(" ");
+      query = query.sort(sortBy);
+    } else {
+      // Default sort: newest products first
+      query = query.sort("-createdAt");
+    }
+
+    // --- 4. EXECUTE THE QUERY ---
+    const products = await query;
 
     res.status(200).json({
       status: "success",
@@ -191,4 +210,3 @@ module.exports = {
   deleteProduct,
   handleImageUpload,
 };
-
