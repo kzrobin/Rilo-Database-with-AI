@@ -35,6 +35,11 @@ const orderSchema = new Schema(
       type: Number,
       required: [true, "Total amount is required."],
     },
+    addressId: {
+      type: Schema.Types.ObjectId,
+      ref: "Address",
+      required: true,
+    },
 
     status: {
       type: String,
