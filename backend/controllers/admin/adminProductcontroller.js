@@ -100,7 +100,7 @@ const createProduct = async (req, res) => {
 // get all products
 const getAllProducts = async (req, res) => {
   try {
-    const products = await ProductModel.find();
+    const products = await ProductModel.find().sort({ createdAt: -1 });
 
     res.status(200).json({
       status: "success",

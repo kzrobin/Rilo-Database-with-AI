@@ -54,6 +54,7 @@ const register = async (req, res) => {
         email: user.email,
         role: user.role,
         createdAt: user.createdAt,
+        profilePicture: user.profilePicture,
       },
     });
   } catch (err) {
@@ -96,6 +97,7 @@ const loginUser = async (req, res, next) => {
         createdAt: user.createdAt,
         fullname: user.fullname,
         role: user.role, // <-- Include role in the response
+        profilePicture: user.profilePicture,
       },
     });
   } catch (error) {

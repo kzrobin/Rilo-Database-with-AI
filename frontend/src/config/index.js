@@ -123,11 +123,6 @@ export const shoppingViewHeaderMenuItems = [
     path: "/shop/listing",
   },
   {
-    id: "footwear",
-    label: "Footwear",
-    path: "/shop/listing",
-  },
-  {
     id: "accessories",
     label: "Accessories",
     path: "/shop/listing",
@@ -164,14 +159,6 @@ export const filterOptions = {
     { id: "accessories", label: "Accessories" },
     { id: "footwear", label: "Footwear" },
   ],
-  brand: [
-    { id: "nike", label: "Nike" },
-    { id: "adidas", label: "Adidas" },
-    { id: "puma", label: "Puma" },
-    { id: "levi", label: "Levi's" },
-    { id: "zara", label: "Zara" },
-    { id: "h&m", label: "H&M" },
-  ],
 };
 
 export const sortOptions = [
@@ -188,6 +175,7 @@ export const addressFormControls = [
     componentType: "input",
     type: "text",
     placeholder: "Enter your address",
+    required: true,
   },
   {
     label: "City",
@@ -195,6 +183,7 @@ export const addressFormControls = [
     componentType: "input",
     type: "text",
     placeholder: "Enter your city",
+    required: true,
   },
   {
     label: "Pincode",
@@ -202,6 +191,7 @@ export const addressFormControls = [
     componentType: "input",
     type: "text",
     placeholder: "Enter your pincode",
+    required: true,
   },
   {
     label: "Phone",
@@ -209,11 +199,13 @@ export const addressFormControls = [
     componentType: "input",
     type: "text",
     placeholder: "Enter your phone number",
+    required: true,
   },
   {
     label: "Notes",
     name: "notes",
     componentType: "textarea",
     placeholder: "Enter any additional notes",
+    required: false,
   },
 ];

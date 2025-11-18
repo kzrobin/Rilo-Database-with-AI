@@ -43,10 +43,6 @@ router.post(
 // add products
 router.post(
   "/products",
-  (req, res, next) => {
-    console.log(req.body);
-    next();
-  },
   [
     body("title")
       .isString()
@@ -86,10 +82,10 @@ router.post(
 );
 
 // get all products
-router.get("/products", getAllProducts);
+router.get("/", getAllProducts);
 
 // get products by id
-router.get("/products/:id", getProductById);
+router.get("/:id", getProductById);
 // edit product by id
 
 router.put(
@@ -138,6 +134,6 @@ router.put(
   updateProduct
 );
 // delete products by id
-router.delete("/products/:id", deleteProduct);
+router.delete("/:id", deleteProduct);
 
 module.exports = router;

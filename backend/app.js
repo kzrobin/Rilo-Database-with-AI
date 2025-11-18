@@ -7,10 +7,13 @@ const homeRoutes = require("./routes/homeRoutes");
 const userRoutes = require("./routes/userRoutes");
 const fabricRoutes = require("./routes/fabricRoutes");
 const productRoutes = require("./routes/productRoutes");
-const cartRoutes = require("./routes/cartRoutes");
+const cartRoutes = require("./routes/shopRoutes/cartRoutes");
 const orderRouter = require("./routes/orderRoutes");
 const aiQueryRouter = require("./routes/aiQueryRoutes");
 const adminProductsRouter = require("./routes/adminRoutes/adminProductRoutes");
+const shopProductRoutes = require("./routes/shopRoutes/shopProductRoutes");
+const shopCartRoute = require("./routes/shopRoutes/cartRoutes");
+const shopAddressRoute = require("./routes/shopRoutes/addressRoutes");
 
 const connectToDB = require("./db/db");
 const cookieParser = require("cookie-parser");
@@ -21,8 +24,8 @@ app.use(
     origin: process.env.FRONTEMD_URL.split(","),
     credentials: true,
   })
-); 
-    
+);
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
@@ -35,6 +38,10 @@ app.use("/api/products", productRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/orders", orderRouter);
 app.use("/api/ai-query", aiQueryRouter);
+app.use("/api/shop/products", shopProductRoutes);
+app.use("/api/shop/cart", shopCartRoute);
+app.use("/api/shop/address", shopAddressRoute);
+
 // app.use("/api/reviews", reviewRouter);
 
 // --- Global Error Handling Middleware ---
