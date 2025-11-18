@@ -31,7 +31,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 app.use("/", homeRoutes);
-app.use("/api/admin", adminProductsRouter);
+app.use("/api/admin/products", adminProductsRouter);
 app.use("/api/users", userRoutes);
 app.use("/api/fabrics", fabricRoutes);
 app.use("/api/products", productRoutes);
