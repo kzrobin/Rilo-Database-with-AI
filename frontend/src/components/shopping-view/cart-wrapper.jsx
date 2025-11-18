@@ -4,9 +4,12 @@ import { Button } from "../ui/button";
 import UserCartItemsContent from "./card-items-content";
 import { useDispatch, useSelector } from "react-redux";
 import { getCart } from "@/store/shop/cart-slice";
+import { useNavigate } from "react-router-dom";
 
-const UserCartWrapper = () => {
+const UserCartWrapper = ({ setOpen }) => {
   const dispatch = useDispatch();
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     dispatch(getCart());
@@ -46,7 +49,15 @@ const UserCartWrapper = () => {
         <span> ৳{totalAmount}</span>
       </div>
 
-      <Button className="w-full mt-6">Check out</Button>
+      <Button
+        className="w-full mt-6"
+        onClick={() => {
+          navigate("/shop/checkout");
+          setOpen(false);
+        }}
+      >
+        Check out
+      </Button>
     </SheetContent>
   );
 };
