@@ -1,126 +1,203 @@
 // controllers/aiQueryController.js
-require('dotenv').config();
 
-const mongoose = require('mongoose');
-const vm = require('vm');
-const { ObjectId } = require('mongodb');
 const {
+  isSmalltalk,
+  looksDestructive,
+  smalltalkReply,
   convertNaturalLanguageToQuery,
   toHumanAnswer,
-  isSmalltalk,
-  smalltalkReply,
-  looksDestructive,
-} = require('../utils/translator');
+  inferAnswerRole,
+} = require("../utils/translator");
 
-// Allow-list for safety
-const ALLOWED_METHODS = new Set(['find', 'countDocuments', 'aggregate']);
-const ALLOWED_COLLECTIONS = new Set(['users', 'fabrics', 'products', 'carts', 'orders', 'reviews']);
+// Mongoose models (adjust paths if needed)
+const Product = require("../models/productModel");
+const Fabric = require("../models/fabricModel");
+const Cart = require("../models/cartModel");
+const Order = require("../models/orderModel");
+const Review = require("../models/reviewModel");
 
-const FORBIDDEN_KEYWORDS = [
-  ' delete ', ' drop ', ' truncate ', ' remove all ', ' update all ', ' insert ', ' create ',
-  ' delete', 'drop', 'truncate', 'remove all', 'update all', 'insert', 'create',
-];
-
-// Parse: db.<collection>.<method>(<args>)
-function parseQuery(queryString) {
-  const q = (queryString || '').trim().replace(/;$/, '');
-  const m = /^db\.(\w+)\.(\w+)\(([\s\S]*?)\)$/.exec(q);
-  if (!m) throw new Error('Unsupported or malformed query string.');
-
-  const [, coll, method, argsStr] = m;
-
-  if (!ALLOWED_COLLECTIONS.has(coll)) throw new Error(`Collection '${coll}' is not allowed.`);
-  if (!ALLOWED_METHODS.has(method)) throw new Error(`Method '${method}' is not allowed.`);
-
-  // Safely evaluate the argument list with a tiny sandbox
-  const sandbox = { ObjectId, Date };
-  const context = vm.createContext(sandbox);
-  let args;
-  try {
-    args = vm.runInContext(`[${argsStr}]`, context);
-  } catch (e) {
-    throw new Error(`Failed to parse arguments: ${e.message}`);
+// Map MongoDB collection name → Mongoose model
+function getModelByCollection(name) {
+  switch (name) {
+    case "products":
+      return Product;
+    case "fabrics":
+      return Fabric;
+    case "carts":
+      return Cart;
+    case "orders":
+      return Order;
+    case "reviews":
+      return Review;
+    default:
+      throw new Error(`Unknown collection in query: ${name}`);
   }
-
-  return { coll, method, args };
 }
 
-async function executeMongoQuerySafely(queryString) {
-  const db = mongoose?.connection?.db;
-  if (!db || typeof db.collection !== 'function') {
-    throw new Error('Database not available. Ensure mongoose is connected before calling this endpoint.');
-  }
-
-  // Quick extra safety scan
-  const lower = ` ${queryString.toLowerCase()} `;
-  if (FORBIDDEN_KEYWORDS.some(k => lower.includes(k))) {
-    throw new Error('Query contains a forbidden operation.');
-  }
-
-  const { coll, method, args } = parseQuery(queryString);
-  const collection = db.collection(coll);
-
-  if (method === 'find') {
-    const filter = args[0] || {};
-    const proj = args[1] || {};
-    return await collection.find(filter, { projection: proj }).toArray();
-  }
-
-  if (method === 'countDocuments') {
-    const filter = args[0] || {};
-    return await collection.countDocuments(filter);
-  }
-
-  if (method === 'aggregate') {
-    const pipe = Array.isArray(args[0]) ? args[0] : [];
-    return await collection.aggregate(pipe).toArray();
-  }
-
-  throw new Error(`Unsupported method: '${method}'.`);
+// Safely eval a JS literal (object/array) coming from the LLM.
+// We restrict to data structures only; no functions or code.
+function evalLiteral(literalText) {
+  // Wrap in parentheses so object literals parse correctly
+  const wrapped = `return (${literalText});`;
+  // eslint-disable-next-line no-new-func
+  const fn = new Function(wrapped);
+  return fn();
 }
 
-const translateAndRunQuery = async (req, res) => {
-  const question = (req.body?.question || req.body?.query || req.body?.message || '').trim();
-  if (!question) return res.status(400).json({ ok: false, error: "A 'question' (or 'query'/'message') is required." });
+// Execute a Mongo-style string like:
+//   db.products.find({ ... }).limit(20)
+//   db.orders.aggregate([ ... ])
+async function executeMongoQueryFromString(queryString) {
+  if (!queryString || typeof queryString !== "string") {
+    throw new Error("Empty or invalid query string");
+  }
 
-  try {
-    // 1) Small-talk handling
-    if (isSmalltalk(question)) {
-      return res.json({ ok: true, conversational: true, answer: smalltalkReply(question), results: [] });
+  const q = queryString.trim().replace(/;+\s*$/, "");
+  if (!q.startsWith("db.")) {
+    throw new Error(`Query must start with "db.": ${q}`);
+  }
+
+  // Extract "collection.method(...)..."
+  const afterDb = q.slice(3); // remove "db."
+  const firstDotIdx = afterDb.indexOf(".");
+  if (firstDotIdx === -1) {
+    throw new Error(`Invalid query format (no collection method): ${q}`);
+  }
+
+  const collection = afterDb.slice(0, firstDotIdx).trim();
+  const rest = afterDb.slice(firstDotIdx + 1).trim(); // e.g. "find({ ... }).limit(10)"
+
+  const Model = getModelByCollection(collection);
+
+  // Handle aggregate(...)
+  if (rest.startsWith("aggregate(")) {
+    // Match aggregate( [ ... ] )
+    const aggMatch = rest.match(/aggregate\s*\(\s*(\[[\s\S]*\])\s*\)/);
+    if (!aggMatch) {
+      throw new Error(`Could not parse aggregate pipeline from: ${q}`);
+    }
+    const pipelineLiteral = aggMatch[1];
+    const pipeline = evalLiteral(pipelineLiteral);
+    if (!Array.isArray(pipeline)) {
+      throw new Error("Parsed aggregate pipeline is not an array");
+    }
+    const docs = await Model.aggregate(pipeline);
+    return docs;
+  }
+
+  // Handle find(...)
+  if (rest.startsWith("find(")) {
+    // Pattern: find({ ... })[.limit(N)]
+    const findMatch = rest.match(
+      /find\s*\(\s*([\s\S]*?)\s*\)(?:\s*\.limit\s*\(\s*(\d+)\s*\))?/
+    );
+    if (!findMatch) {
+      throw new Error(`Could not parse find query from: ${q}`);
     }
 
-    // 2) Guard destructive intent at the natural-language level
-    if (looksDestructive(question)) {
-      return res.status(403).json({
+    const filterLiteral =
+      findMatch[1] && findMatch[1].trim() ? findMatch[1].trim() : "{}";
+    const limitStr = findMatch[2];
+    const limit = limitStr ? parseInt(limitStr, 10) : 20;
+
+    const filter = evalLiteral(filterLiteral);
+    const docs = await Model.find(filter).limit(limit).lean();
+    return docs;
+  }
+
+  throw new Error(`Unsupported query type in: ${q}`);
+}
+
+// Main controller
+// POST /ai-query
+// Body: { "question": "..." }
+async function translateAndRunQuery(req, res) {
+  try {
+    const { question } = req.body || {};
+    const message = (question || "").toString().trim();
+
+    if (!message) {
+      return res.status(400).json({
         ok: false,
-        error: 'Destructive intent refused',
-        answer: "That looks like a destructive operation. I can only do read-only lookups and summaries.",
+        error: "Empty question",
       });
     }
 
-    // 3) Ask the LLM (with built-in retries/fallback) to produce a safe read-only Mongo query
-    const { query: generatedQuery, planner_source } = await convertNaturalLanguageToQuery(question);
+    // 1) Handle smalltalk (no DB)
+    if (isSmalltalk(message)) {
+      const answer = smalltalkReply(message);
+      return res.json({
+        ok: true,
+        planner_source: "smalltalk",
+        mongodb_query: null,
+        result_count: 0,
+        results: [],
+        answer,
+        role: "user",
+      });
+    }
 
-    // 4) Execute the query safely
-    const results = await executeMongoQuerySafely(generatedQuery);
+    // 2) Block obviously destructive intent
+    if (looksDestructive(message)) {
+      return res.status(400).json({
+        ok: false,
+        planner_source: "blocked",
+        mongodb_query: null,
+        result_count: 0,
+        results: [],
+        answer:
+          "That kind of destructive operation isn't allowed. Please ask about products, stock, orders, or reviews instead.",
+        role: "user",
+      });
+    }
 
-    // 5) Human-friendly answer
-    const answer = toHumanAnswer(question, generatedQuery, results);
-    const role = await require('../utils/translator').inferAnswerRole(answer);
+    // 3) Ask LLM to convert natural language → Mongo query string
+    const { query: generatedQuery, planner_source } =
+      await convertNaturalLanguageToQuery(message);
+
+    if (!generatedQuery) {
+      return res.status(500).json({
+        ok: false,
+        error: "Planner failed to produce a query",
+      });
+    }
+
+    // 4) Execute the MongoDB query
+    const results = await executeMongoQueryFromString(generatedQuery);
+
+    // 5) Turn results into natural language answer (IMPORTANT: await!)
+    const answerText = await toHumanAnswer(message, generatedQuery, results);
+
+    // 6) Ask LLM which role this answer is intended for (user/admin)
+    const role = await inferAnswerRole(answerText);
+
+    // Compute result_count for convenience
+    let resultCount = 0;
+    if (Array.isArray(results)) {
+      resultCount = results.length;
+    } else if (typeof results === "number") {
+      resultCount = 1;
+    }
 
     return res.json({
       ok: true,
-      planner_source,                 // "llm" or "fallback"
+      planner_source,
       mongodb_query: generatedQuery,
-      result_count: Array.isArray(results) ? results.length : (typeof results === 'number' ? results : 1),
+      result_count: resultCount,
       results,
-      answer,
+      answer: answerText,
       role,
     });
   } catch (err) {
-    console.error('AI query error:', err);
-    return res.status(500).json({ ok: false, error: 'Unhandled error', detail: String(err.message || err) });
+    console.error("[aiQueryController] error:", err);
+    return res.status(500).json({
+      ok: false,
+      error: "Unhandled error",
+      detail: err.message || String(err),
+    });
   }
-};
+}
 
-module.exports = { translateAndRunQuery };
+module.exports = {
+  translateAndRunQuery,
+};
