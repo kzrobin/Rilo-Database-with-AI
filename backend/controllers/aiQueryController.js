@@ -113,6 +113,7 @@ async function executeMongoQueryFromString(queryString) {
 // Body: { "question": "..." }
 async function translateAndRunQuery(req, res) {
   try {
+    console.log(req.body);
     const { question } = req.body || {};
     const message = (question || "").toString().trim();
 

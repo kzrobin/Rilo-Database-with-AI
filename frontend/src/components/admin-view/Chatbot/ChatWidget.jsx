@@ -36,7 +36,7 @@ export function ChatWidget() {
     try {
       const response = await axios.post(
         `${baseUrl}/ai-query`,
-        { message: userMessage },
+        { question: userMessage },
         { withCredentials: true }
       );
 
