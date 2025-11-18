@@ -1,7 +1,7 @@
 import React from "react";
 
 const AdminOrder = () => {
-  return <div>Order</div>;
+  return <div>Orders to check</div>;
 };
 
 export default AdminOrder;

@@ -2,7 +2,7 @@ import React from "react";
 import { useSelector } from "react-redux";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import bannerThree from "../../assets/account.jpg";
-import Orders from "@/components/shopping-view/orders";
+import ShoppingOrders from "@/components/shopping-view/orders";
 import Address from "@/components/shopping-view/address";
 
 const ShoppingAccount = () => {
@@ -22,7 +22,7 @@ const ShoppingAccount = () => {
         <div className="flex flex-col rounded-lg border bg-background p-6 shadow-sm">
           <Tabs defaultValue="orders">
             <TabsList>
-              <TabsTrigger value="orders">Orders</TabsTrigger>
+              <TabsTrigger value="orders">ShoppingOrder</TabsTrigger>
               <TabsTrigger value="address">Address</TabsTrigger>
             </TabsList>
             <TabsContent value="orders">

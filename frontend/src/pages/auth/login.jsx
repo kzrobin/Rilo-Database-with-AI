@@ -27,7 +27,7 @@ const AuthLogin = () => {
         .then((data) => {
           console.log(data);
         });
-      navigate("/shop");
+      navigate("/shop/home");
       toast.success("Wellcome to Rilo Cloths");
     } catch (error) {
       console.error("Registration failed:", error);

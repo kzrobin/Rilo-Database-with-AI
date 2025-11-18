@@ -71,7 +71,7 @@ const HeaderRight = ({ user }) => {
           </Button>
         </SheetTrigger>
 
-        <UserCartWrapper cartItems={cartItems} />
+        <UserCartWrapper cartItems={cartItems} setOpen={setOpen} />
       </Sheet>
 
       {/* Profile Dropdown */}
@@ -152,7 +152,7 @@ const ShoppingHeader = () => {
         {/* Logo */}
         <Link to="/shop/home" className="flex items-center gap-2">
           <Shirt className="h-6 w-6" />
-          <span className="font-bold text-lg">Railo Cloth</span>
+          <span className="font-bold text-lg">Rilo Cloth</span>
         </Link>
 
         {/* MOBILE Left: Menu + Cart */}

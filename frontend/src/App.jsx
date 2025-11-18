@@ -4,7 +4,7 @@ import AuthLogin from "./pages/auth/login";
 import AuthRegister from "./pages/auth/register";
 import AdminLayout from "./components/admin-view/layout";
 import AdminDashbroad from "./pages/admin-view/dashbroad";
-import AdminOrder from "./pages/admin-view/order";
+import AdminOrder from "./pages/admin-view/orders";
 import AdminProduct from "./pages/admin-view/product";
 import NotFound from "./pages/NotFound";
 import ShoppingLayout from "./components/shopping-view/layout";
