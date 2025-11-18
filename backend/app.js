@@ -8,12 +8,12 @@ const userRoutes = require("./routes/userRoutes");
 const fabricRoutes = require("./routes/fabricRoutes");
 const productRoutes = require("./routes/productRoutes");
 const cartRoutes = require("./routes/shopRoutes/cartRoutes");
-const orderRouter = require("./routes/orderRoutes");
 const aiQueryRouter = require("./routes/aiQueryRoutes");
 const adminProductsRouter = require("./routes/adminRoutes/adminProductRoutes");
 const shopProductRoutes = require("./routes/shopRoutes/shopProductRoutes");
 const shopCartRoute = require("./routes/shopRoutes/cartRoutes");
 const shopAddressRoute = require("./routes/shopRoutes/addressRoutes");
+const shopOrderRoute = require("./routes/shopRoutes/orderRoutes");
 
 const connectToDB = require("./db/db");
 const cookieParser = require("cookie-parser");
@@ -36,11 +36,11 @@ app.use("/api/users", userRoutes);
 app.use("/api/fabrics", fabricRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/cart", cartRoutes);
-app.use("/api/orders", orderRouter);
 app.use("/api/ai-query", aiQueryRouter);
 app.use("/api/shop/products", shopProductRoutes);
 app.use("/api/shop/cart", shopCartRoute);
 app.use("/api/shop/address", shopAddressRoute);
+app.use("/api/shop/orders", shopOrderRoute);
 
 // app.use("/api/reviews", reviewRouter);
 

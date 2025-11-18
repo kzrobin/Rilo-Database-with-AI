@@ -9,17 +9,20 @@ const reviewSchema = new Schema(
       min: [0, "Rating cannot be less than 0."],
       max: [5, "Rating cannot exceed 5."],
     },
+
     description: {
       type: String,
       required: [true, "Review description is required."],
       trim: true,
     },
-    product_id: {
+
+    productId: {
       type: Schema.Types.ObjectId,
       ref: "Product",
       required: true,
     },
-    user_id: {
+
+    userId: {
       type: Schema.Types.ObjectId,
       ref: "User",
       required: true,
@@ -30,4 +33,3 @@ const reviewSchema = new Schema(
 
 const ReviewModel = mongoose.model("Review", reviewSchema);
 module.exports = ReviewModel;
-   

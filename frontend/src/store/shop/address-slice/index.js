@@ -112,7 +112,6 @@ const addressSlice = createSlice({
       .addCase(getAddresses.fulfilled, (state, action) => {
         state.isLoading = false;
         state.addressList = action.payload.data;
-        toast.success("Address added successfully");
       })
       .addCase(getAddresses.rejected, (state) => {
         state.isLoading = false;
@@ -125,7 +124,6 @@ const addressSlice = createSlice({
       .addCase(updateAddress.fulfilled, (state, action) => {
         state.isLoading = false;
         state.addressList = action.payload.data;
-        toast.success("Address updated successfully");
       })
       .addCase(updateAddress.rejected, (state) => {
         state.isLoading = false;
@@ -138,7 +136,6 @@ const addressSlice = createSlice({
       .addCase(deleteAddress.fulfilled, (state, action) => {
         state.isLoading = false;
         state.addressList = action.payload.data;
-        toast.success("Address deleted successfully");
       })
       .addCase(deleteAddress.rejected, (state) => {
         state.isLoading = false;
